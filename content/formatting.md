@@ -1,18 +1,18 @@
 
 # JSON Format
 
-> **APIs must use JSON formatted input and output.**
+> **APIs MUST use JSON formatted input and output.**
 
 **Example** 
 ```json
 "user" : {
-    "id": 19083974,					// Number
-    "name": "John Doe",				// String
+    "id": 19083974, 
+    "name": "John Doe",
     "email": "john.doe@psa.com",
     "age": 19,
-    "roles": ["admin", "editor"],	// Array
-    "disabled" : false,				// Boolean
-    "address":{						// Object
+    "roles": ["admin", "editor"],
+    "disabled" : false,
+    "address":{
         "city": "Paris"
 	}
 }
@@ -20,7 +20,7 @@
 
 ## Object Key
 
-> **A key or attribute must be unique for any given level of data**
+> **A key or attribute MUST BE unique for any given level of data**
 
  - **Bad example**
 	 ```json
@@ -46,7 +46,7 @@
 	} 
 	```
 
-> **Respect the informational context by using clear and explicit naming and use generic terms reusable in a different context than the application it  was first designed for.**
+> **You MUST respect the informational context by using clear and explicit naming and use generic terms reusable in a different context than the application it  was first designed for.**
 
  - **Bad example**
 	 ```json
@@ -54,7 +54,7 @@
 	 
     "customer" : {
 	    "customeId": 19083974,	// Bad naming since a customer could be a different object in a different context
-	    "home_address" : {			// Not developer friendly as other projects might call it differently
+	    "home_address" : {		// Not developer friendly as other projects might call it differently
 		    "city":"Paris"
 	    }
 	} 
@@ -73,7 +73,7 @@
 
 ## Object Value
 
-> **JSON is a loosely typed format.  Nonetheless, formats must be  standardize for any JSON objects (see payload conventions)**
+> **JSON is a loosely typed format.  Nonetheless, formats MUST BE standardize for any JSON objects (see payload conventions)**
 
 In JSON, values must be one of the following data types:
  - a string :  `{ "name":"John" }`
@@ -83,7 +83,7 @@ In JSON, values must be one of the following data types:
  - a boolean  `"disabled" : false`
  - null `"address" : null`
 
-> **Null objects must never be included in a JSON response because it decreases payload size and facilitates API/resource evolution**
+> **Null objects MUST NOT be included in a JSON response because it decreases payload size and facilitates API/resource evolution**
 
  - **Bad example**
 	 ```json
@@ -104,9 +104,9 @@ In JSON, values must be one of the following data types:
 	```
 ## Handling Multiple Formats
 
-> **In the case where APIs serve more than one content type, consumers must specify type they need using Accept header**
+> **In the case where APIs serve more than one content type, consumers MUST specify type they need using Accept header**
 
-APIs may take as **input or output any content type needed** (an audio file, a specific text format etc.)  Each API endpoint **specifies what response type it outputs and what it consumes** in cases where it applies (for POST requests for instance) :
+APIs MAY take as **input or output any content type needed** (an audio file, a specific text format etc.)  Each API endpoint **specifies what response type it outputs and what it consumes** in cases where it applies (for POST requests for instance) :
 
 ```
 GET /URL  HTTP/1.1	 
