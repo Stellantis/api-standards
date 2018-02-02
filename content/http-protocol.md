@@ -5,7 +5,7 @@ REST APIs are designed around the rich HTTP protocol.
 
 ## HTTP Verbs
 
-> **Normalize HTTP verbs usage to keep the API intuitive. Only the 5 verbs below should be used : use the right verb for the right operation to perform** 
+> **Normalize HTTP verbs usage to keep the API intuitive. Only the 5 verbs below SHALL BE used : use the right verb for the right operation to perform** 
 
 |  Method | Action |
 |--|--|
@@ -18,12 +18,12 @@ REST APIs are designed around the rich HTTP protocol.
 
 ## Idempotent vs. Safe 
 
-> **Keep idempotent and safe principles in mind when developing APIs. HTTP verbs that are idempotent must not lead to non idempotent operations and vice versa.** 
+> **Keep idempotent and safe principles in mind when developing APIs. HTTP verbs that are idempotent MUST NOT lead to non idempotent operations and vice versa.** 
 
 
 ### Idempotent
 
-An idempotent HTTP method is a HTTP method that **can be called many times without different outcomes**. It would not matter if the method is called only once, or ten times over. **The result should be the same**. 
+An idempotent HTTP method is a HTTP method that **can be called many times without different outcomes**. It would not matter if the method is called only once, or ten times over. **The result MUST BE the same**. 
 
 **Example**
 
@@ -38,7 +38,7 @@ An idempotent HTTP method is a HTTP method that **can be called many times witho
  
 ### Safe
 
-Safe methods are HTTP **methods that do not modify resources**. Meaning if you use a safe HTTP method it should never have an create, update or delete resources. In addition, safe methods are methods that can be cached, prefetched without any repercussions to the resource.
+Safe methods are HTTP **methods that do not modify resources**. Meaning if you use a safe HTTP method it MUST NOT create, update or delete resources. In addition, safe methods are methods that can be cached, prefetched without any repercussions to the resource.
 
 **Example** 
 
@@ -59,7 +59,7 @@ Safe methods are HTTP **methods that do not modify resources**. Meaning if you u
 
 ## HTTP Status Codes
 
-> **HTTP status codes are used to indicate to the client the state of a request (success, error, information etc.) and bring an additional functional information. Refer to this list whenever you want to return responses. Limit to the codes below.** 
+> **HTTP status codes are used to indicate to the client the state of a request (success, error, information etc.) and bring an additional functional information. Refer to this list whenever you want to return responses only the codes below SHALL BE used.** 
 
 | Code|Meaning       |Meaning
 |-----|-------------|-------------|
