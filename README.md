@@ -5,6 +5,8 @@ Standards and guidelines for Groupe PSA REST APIs.
 # Table Of Contents
 
  - [HTTP Protocol](https://github.com/GroupePSA/api-standards/blob/master/content/http-protocol.md)
+ - [Formatting](https://github.com/GroupePSA/api-standards/blob/master/content/formatting.md)
+ - [API Endpoint](https://github.com/GroupePSA/api-standards/blob/master/content/api-endpoint.md)
 
 # License
 
