@@ -127,3 +127,136 @@ There are multiple ways of working around this, choose the one that makes sense 
 **Example** : `GET /customers?sort=name,age` fetch all customers and sort by `name` and `age`
 
 **Example** : `GET /customers?sort=age&desc=age` fetch all customers and sort by `age` in `desc` order 
+
+
+### Pagination
+
+#### Offset/Limit pagination
+
+> This pagination technique is the easiest to implement and **SHALL BE used by default**. You MUST choose a default number of items to be returned  (that would mean a default *limit*).
+
+    GET /customers?offset=5&limit=8 
+    
+    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+                 ^----------------------^
+                 offset	                limit
+                 
+    Returns [4, 5, 6, 7, 8, 9, 10, 11] 
+     
+**Request**
+
+    GET /customers/  HTTP/1.1
+
+**Response**
+
+```json 
+{
+	"data": [
+		{"name": "John Doe", "..." },
+		{"name": "Mark Long", "..." },
+		{"name": "Helen Ping", "..."},
+		{"name": "Chris Temp", "..."},
+		{"name": "Simon Hillman", "..."}
+	],
+	"count": 5,
+	"offset" : 0,
+	"total" : 200 
+}
+```
+**Drawbacks of offset/limit**
+
+For mostly static content where items don’t move between pages frequently, offset/limit is great. But it isn't always the case,  specifically because items are sometimes added and removed while the user is navigating to different pages. Here's what can happen when using offset/limit on dynamic data  :
+
+ 1. **Displaying the same item twice**. This can happen if a new item was added at the top of the list, causing the skip and limit approach to show the item at the boundary between pages twice.
+
+    **Example** : let's consider a list of 6 items **at time t**. The user performs a request to fetch the first page (`GET /items?limit=3`). Now let's say a new item was added at the top of the list and the user performs another request to fetch the second page (`GET /items?limit=3&offset=3`). It the state hadn't changed, he would have gotten the second page with items `[4, 5, 6]`, though he will get a response containing items `[3, 4, 5]`, item 3 being a duplicate.
+ <img src="https://raw.githubusercontent.com/GroupePSA/api-standards/master/examples/images/pagination-example-addition.png" width="600">
+ 
+ 2. **Skipping an item**. Similarly to the example above, if we **remove** an item from the list we'll skip an item. 
+ 
+Though offset/limit can be used in 90% of the cases, it also means that for certain kinds of APIs, using this technique doesn’t make sense because the set of data and the boundaries between loaded sections is constantly changing (i.e. real time data). **In this case, use cursor based pagination**.
+
+#### Cursor-based pagination
+
+> This pagination technique is is bit more complicated to implement though it **MUST BE be used when dealing with real time data.** 
+
+In the example above, if could have specified the exact position in the list we want to begin with, and the number of items we wanted to fetch, we would not have ran into these issues. With this technique, no matter how many items were removed or added to the top of the list , we still have a constant pointer to the exact position where we left off. This pointer is called a **cursor**. A cursor is a unique object identifier that sets the starting point of the pagination until the specified limit. 
+
+**Request**
+
+    GET /customers/  HTTP/1.1
+
+**Response**
+
+```json 
+{
+	"data": [
+		{"name": "John Doe", "..."},
+		{"name": "Mark Long", "..."},
+		{"name": "Helen Ping", "..."},
+		{"name": "Chris Temp", "..."},
+		{"name": "Simon Hillman", "..."}
+	],
+	"before" : "NDMyNzQyODI3OTQw1j3",
+	"after" : "MTAxNTExOTQ1MjAwNzI", 
+	"count": 5,
+	"total" : 200,
+}
+```
+
+**How to choose a cursor ?** Well, first off,  cursors MUST BE :
+ - **Unique** :  if not unique, conflicts may occur while setting the starting point of the pagination 
+ - **Sortable** : to insure consistency and allow sorting 
+ - **Stateless** : if not stateless, a cursor might not be available by the time it is used
+
+The ideal cursor is an **encoded timestamp** of the item, since it is satisfies all the above conditions. In the case where you do not have a timestamp on your items, you have to find the right parameter that satisfies all the above criterias : it could be a hash of an `ID`, `email` etc.
+
+#### Pagination and  hypermedias
+
+If your API uses [hypermedias](tobecompleted) (HAL), pagination can be made easier for the consumer by returning preformatted URIs to fetch the **next** and **previous** pages like so : 
+
+ **Using offset/limit**
+
+```json 
+GET /customers/  HTTP/1.1
+
+{
+	"data": [
+		{"name": "John Doe", "..."},
+		{"name": "Mark Long", "..."},
+		{"name": "Helen Ping", "..."},
+		{"name": "Chris Temp", "..."},
+		{"name": "Simon Hillman", "..."}
+	],
+	"count": 25,
+	"offset" : 0,
+	"total" : 200,
+	"_links": {
+		"previous" : "http://api.mpsa.com/customers?offset=0&limit=25",
+		"next" : "http://api.mpsa.com/customers?offset=25&limit=25"
+	}
+}
+```
+ **Using after/before cursor**
+
+```json 
+GET /customers/  HTTP/1.1
+
+{
+	"data": [
+		{"name": "John Doe", "..."},
+		{"name": "Mark Long", "..."},
+		{"name": "Helen Ping", "..."},
+		{"name": "Chris Temp", "..."},
+		{"name": "Simon Hillman", "..."}
+	],
+	"before" : "NDMyNzQyODI3OTQw1j3",
+	"after" : "MTAxNTExOTQ1MjAwNzI", 
+	"count": 25,
+	"total" : 200,
+	"_links": {
+		"previous" : "http://api.mpsa.com/customers?before=NDMyNzQyODI3OTQw1j3&limit=25",
+		"next" : "http://api.mpsa.com/customers?after=MTAxNTExOTQ1MjAwNzI&limit=25"
+	}
+}
+```
