@@ -29,7 +29,7 @@
     "customer" : {
 	    "id": 19083974,
 	    "name": "John",
-	    "name": "Doe",	// Using name twice on the same level of data is forbidden
+	    "name": "Doe",	"Bad : using name twice on the same level of data is forbidden"
 	} 
 	```
  - **Good example**
@@ -40,7 +40,7 @@
 	    "id": 19083974,
 	    "name": "John Doe",
 	    "address": {
-		    "name": "Home",	// This is allowed since it belongs to address and not customer
+		    "name": "Home",	"Good:  this is allowed since it belongs to address and not customer"
 		    "city": "Paris"
 	    }
 	} 
@@ -53,8 +53,8 @@
 	 GET /customers/19083974  HTTP/1.1
 	 
     "customer" : {
-	    "customeId": 19083974,	// Bad naming since a customer could be a different object in a different context
-	    "home_address" : {		// Not developer friendly as other projects might call it differently
+	    "customeId": 19083974,	"Bad : since a customer could be a different object in a different context"
+	    "home_address" : {		"Bad : not developer friendly as other projects might call it differently"
 		    "city":"Paris"
 	    }
 	} 
@@ -64,9 +64,9 @@
 	 GET /customers/19083974  HTTP/1.1
 	 
     "customer" : {
-	    "id": 19083974,		// Good generic naming : can be used in any context
-	    "address": {		// Good generic naming
-		    "name": "Home",	// Better naming as
+	    "id": 19083974,		"Good: generic naming, can be used in any context"
+	    "address": {		"Good : generic naming"
+		    "name": "Home",	"Good : better naming strategy"
 	    }
 	} 
 	```
@@ -91,7 +91,7 @@ In JSON, values must be one of the following data types:
 	
     "customer" : {
 	    "id": 19083974, 
-	    "address" : null	// Do not return if null
+	    "address" : null	"Bad : do not return if null"
 	} 
 	```
  - **Good example**
@@ -99,7 +99,7 @@ In JSON, values must be one of the following data types:
 	 GET /customers/19083974  HTTP/1.1
 	 
     "customer" : {
-	    "id": 19083974,	// Good generic naming : can be used in any context
+	    "id": 19083974,
 	} 
 	```
 ## Handling Multiple Formats
