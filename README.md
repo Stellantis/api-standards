@@ -1,3 +1,4 @@
+
 # Groupe PSA API standards
 
 Standards and guidelines for Groupe PSA REST APIs.
@@ -42,6 +43,10 @@ Standards and guidelines for Groupe PSA REST APIs.
      - [Caching Near-Static Data](#caching-near-static-data)
      - [No Cache](#no-cache)
    - [Caching Strategy](#caching-strategy) 
+ - [Version Management](#version-management)
+   - [Semantics](#semantics)
+   - [Versioning Policies](#versioning-policies)
+   - [Version Invocation](#version-invocation)
 
 # HTTP Protocol
 
@@ -316,11 +321,11 @@ APIs at PSA must always have the following components :
 
 Let’s consider a **Customer** resource on which we would like to perform several actions such as **list**, **update**, **delete** and **promote**. We could define our API in a way that each URI corresponds to an operation as follows :
 
- - `GET /`**`getCustomers`** : **return** all customers 
- - `GET /`**`deleteCustomer`** : **delete** a customer (using `GET` here because we are not sending any data)
- - `GET /`**`promoteCustomer`** : **promote** a customer (using `GET` here because we are not sending any data)
-  - `POST /`**`createCustomer`** : **create** customer according to the request **body**
-  - `POST /`**`updateCustomer`** : **update** customer according to the request **body**
+ - `GET `**`/getCustomers`** : **return** all customers 
+ - `GET `**`/deleteCustomer`** : **delete** a customer (using `GET` here because we are not sending any data)
+ - `GET `**`/promoteCustomer`** : **promote** a customer (using `GET` here because we are not sending any data)
+ - `POST `**`/createCustomer`** : **create** customer according to the request **body**
+ - `POST `**`/updateCustomer`** : **update** customer according to the request **body**
 
 **What is wrong with this implementation ?**
 > **The URI or API endpoint must not contain actions or verbs. URIs must contain the plural form of resources and the HTTP method should define the kind of action to be performed on the resource.** 
@@ -564,7 +569,7 @@ The ability to cache and reuse previously fetched resources is a critical aspect
 
 ### Caching headers
 
-The following table provides information regarding caching techniques :
+This table summarizes the most used caching techniques :
 
 |Header  | Definition |
 |--|--|
@@ -603,16 +608,58 @@ You can choose not to cache response, in real-time systems for examples, however
 ### Caching strategy 
 
 There's no one best cache strategy. API designers and developers MUST take several parameters into account while working on caching strategy : 
- - **type of data served** : as we've seen before, dynamic and static data will not have the same caching policy.
- - **traffic patterns** : caching was designed to optimize performances by limiting server calls - if your API is used be a few consumers, caching might not be as critical as if your API was used by millions of people.
- - **application-specific requirements for data freshness** : caching is application specific, meaning that a resource might not be cached the same way across all applications.
+ - **Type of data served** : as we've seen before, dynamic and static data will not have the same caching policy.
+ - **Traffic patterns** : caching was designed to optimize performances by limiting server calls - if your API is used be a few consumers, caching might not be as critical as if your API was used by millions of people.
+ - **Application-specific requirements for data freshness** : caching is application specific, meaning that a resource might not be cached the same way across all applications.
  *example* : a GPS location might not be cached the ame way in :  
-  - Real-time applications (Waze for instance) : data has ~1sec or less lifetime
-  - A car dealership application to know approximately where the car is located : data has a ~1min lifetime
+   - Real-time applications (Waze for instance) : data has ~1sec or less lifetime
+   - A car dealership application to know approximately where the car is located : data has a ~1min lifetime
 
-Developers SHALL refer to this diagram when deciding on which caching technique to choose
+Developers SHALL refer to this diagram when deciding on which caching technique to choose :
 
-<img src="https://raw.githubusercontent.com/GroupePSA/api-standards/master/examples/caching/caching-decision-tree.png" width="800">
+<img src="https://raw.githubusercontent.com/GroupePSA/api-standards/master/examples/caching/caching-decision-tree.png" width="700">
+
+# Version Management
+
+This section describes how to version APIs and most specifically what are the invocation rules.
+
+## Semantics 
+
+A version is written as follows : 
+ - **major version** : non-retro compatible updates
+ - **minor version** : retro compatible updates
+ - **patch version** : mostly bug fixing
+\**Retro compatibility : updates that are still compatible with previous versions of the API
+See full detail on versioning on slide X*
+
+## Versioning Policies
+
+API’s are versioned products and MUST adhere to the following versioning principles.
+
+1. API specifications MUST follow the versioning scheme where where the `v` introduces the version, the major is an ordinal starting with `1` for the first LIVE release, and minor is an ordinal starting with `0` for the first minor release of any major release.
+3. API endpoints MUST only reflect the major version. (see below)
+5. A minor API version MUST maintain backward compatibility with all previous minor versions, within the same major version.
+6. A major API version MAY maintain backward compatibility with a previous major version.
+
+## Version Invocation 
+
+There are two main ways to version an API (see next slide), either invoke the version in the :
+ - **URL** : developers MUST invoke the API version in the url of the request : 
+	 	- Cleaner approach, less error prone
+		- Consumers don’t need to handle HTTP headers (which can be tough for some clients)
+		- More explorable : easier testing with a simple browser
+
+    ```
+    https://api.mpsa.com/manufacturing/factory/v1/customers/456
+    ```
+
+ - **HTTP Header**
+
+	``` 
+	Accept: application/json;version=1
+    https://api.mpsa.com/customers/456
+    ```  
+
 
 # License
 
