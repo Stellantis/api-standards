@@ -333,6 +333,7 @@ GET /cars/  HTTP/1.1
 ```
 
 **Sample schema for a list of car objects using HAL**
+
 *Using Offset/Limit pagination : if an API uses cursors, include hash instead*
 
 ```json 
@@ -357,7 +358,7 @@ GET /cars/  HTTP/1.1
   },
   "total": 100,
   "_embedded": {
-    "trips": [{...}]
+    "trips": []
   }
 }     
 ```
@@ -374,14 +375,19 @@ APIs at PSA must always have the following components :
  - **environment** : could be `prod`, `preprod` or `dev`
  - **api** : specifies that this specific URI is an API endpoint
  - **domain** : must always point to `inetpsa.com`
- - ***classification** : the domain it belongs to (usually a business unit)
+ - **classification** : the domain it belongs to. *(May not always be needed in the case of enterprise APIs as opposed to application APIs)*
  - **api name** : the name of the API
  - **version** : must only contain the major version (`v1` instead of `v1.0`)
-##### \* classification : may not always be needed in the case of enterprise APIs (as opposed to application APIs)
 
 **Example** : API called `factory` under the `manufacturing` domain. This specific endpoint addresses `v1` of the API and accesses the ressource `customers` (filtering by name `John`) 
 
-    https:// api.mpsa.com/manufacturing/v1/factory/customers?name=john
+	    https://api.mpsa.com/manufacturing/factory/v1/customers?name=john
+	    \___/  \___________/ \___________/\______/\_/ \_______/ \_______/ 
+	      |          |             |         |     |      |         |
+	   protocol    domain   classification  api version resource  query 
+	            environement                name                parameters
+      
+
 
 ## URI Naming Rules
 
