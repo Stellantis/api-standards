@@ -20,10 +20,10 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
  - [Formatting](#formatting)
    - [JSON Types](#json-types)
      -  [JSON Primitive Types](#json-primitive-types)
-   - [Common Types](#common-types)
-	 -  [Internationalization](#internationalization)
-	 -  [Date, Time and Timezone](#date-time-and-timezone)
-	 -  [Date Time Common Types](#date-time-common-types)
+     -  [Common Types](#common-types)
+	   -  [Internationalization](#internationalization)
+	   -  [Date, Time and Timezone](#date-time-and-timezone)
+	   -  [Date Time Common Types](#date-time-common-types)
    - [Error Handling](#error-handling)
 	 - [Error Schema](#error-schema)
    - [Hypermedia](#hypermedia)
@@ -187,7 +187,7 @@ For each HTTP method, API developers SHOULD use only status codes marked as "X" 
 
 This section provides guidelines related to usage of [JSON primitive types](#json-primitive) as well as [commonly useful JSON types](#common-types) for address, name, currency, money, country, phone, among other things.
 
-#### JSON Primitive Types
+### JSON Primitive Types
 
 JSON Schema [draft-04][9] SHOULD be used to define all fields in APIs. As such, the following notes about the JSON Schema primitive types SHOULD be respected. Following are the guidelines governing use of JSON primitive type representations.
 **String**
@@ -195,11 +195,11 @@ JSON Schema [draft-04][9] SHOULD be used to define all fields in APIs. As such, 
 **Array**
 **Null** : APIs MUST NOT produce or consume `null` values.
 
-## Common Types
+### Common Types
 
 Resource representations in API MUST reuse the [common data type](tobecompleted) definitions where possible. Following sections provide some details about some of these common types. Please refer to the [schema](tobecompleted) for more details.
 
-### Internationalization
+#### Internationalization
 
 The following common types MUST be used with regard to global country, currency, language and locale.
 
@@ -213,7 +213,7 @@ The following common types MUST be used with regard to global country, currency,
 * [`locale.json`](schema/json/draft-04/locale.json) : locale type defines the concept of locale, which is composed of `country_code` and `language`. Optionally, IANA timezone can be included to further define the locale.
 * [`province.json`](schema/json/draft-04/province.json) : province type provides detailed definition of province or state, based on [ISO-3166-2](https://en.wikipedia.org/wiki/ISO_3166-2) country subdivisions, with room for variant local, international, and abbreviated representations of province names. Useful for logistics, statistics, and building state pull-downs for on-boarding.
 
-### Date, Time and Timezone
+#### Date, Time and Timezone
 
 When dealing with date and time, all APIs MUST conform to the following guidelines.
 
@@ -227,7 +227,7 @@ When dealing with date and time, all APIs MUST conform to the following guidelin
 
 * When expressing [floating](https://www.w3.org/International/wiki/FloatingTime) time values that are not tied to specific time zones such as user's date of birth, expiry date, publication date etc. in requests or responses, an API SHOULD NOT associate it with a timezone. The reason is that a UTC offset changes the meaning of a floating time value. For examples, all countries with timezones west of prime meridian would consider a floating time value to be the previous day.
 
-### Date Time Common Types
+#### Date Time Common Types
 
 The following common types MUST be used to express various date-time formats:
 
