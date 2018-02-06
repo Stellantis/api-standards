@@ -3,6 +3,8 @@
 
 Standards and guidelines for Groupe PSA REST APIs.
 
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119 [RFC2119].
+
 # Table Of Contents
 
  - [HTTP Protocol](#http-protocol)
@@ -16,10 +18,19 @@ Standards and guidelines for Groupe PSA REST APIs.
      -  [Allowed Status Codes List](#allowed-status-codes-list)
      -  [HTTP Method to Status Code Mapping](#http-method-to-status-code-mapping)
  - [Formatting](#formatting)
-   - [JSON Formatting](#json-formatting)
-     - [Object Key](#object-key)
-     - [Object Value](#object-value)
-   - [Handling Multiple Formats](#handling-multiple-formats) 
+   - [JSON Types](#json-types)
+     -  [JSON Primitive Types](#json-primitive-types)
+   - [Common Types](#common-types)
+	 -  [Internationalization](#internationalization)
+	 -  [Date, Time and Timezone](#date-time-and-timezone)
+	 -  [Date Time Common Types](#date-time-common-types)
+   - [Error Handling](#error-handling)
+	 - [Error Schema](#error-schema)
+   - [Hypermedia](#hypermedia)
+	 - [HATEOAS](#hateoas)
+	 - [HAL](#hal)
+	 - [HAL Examples](#hal-examples)
+	 - [Paginating With HAL](#paginating-wit-hal)
  - [API Endpoint](#api-endpoint)
    - [URI Structure](#uri-structure)
    - [URI Naming Rules](#uri-naming-rules)
@@ -47,6 +58,7 @@ Standards and guidelines for Groupe PSA REST APIs.
    - [Semantics](#semantics)
    - [Versioning Policies](#versioning-policies)
    - [Version Invocation](#version-invocation)
+ - [Payload Conventions](#payload-conventions)
 
 # HTTP Protocol
 
@@ -169,131 +181,187 @@ For each HTTP method, API developers SHOULD use only status codes marked as "X" 
 
     * As the `DELETE` method MUST be idempotent as well, it SHOULD still return `204`, even if the resource was already deleted. Usually the API consumer does not care if the resource was deleted as part of this operation, or before. This is also the reason why `204` instead of `404` should be returned.
 
-
-
 # Formatting
 
-## JSON Formatting
+## JSON Types
 
-> **APIs MUST use JSON formatted input and output.**
+This section provides guidelines related to usage of [JSON primitive types](#json-primitive) as well as [commonly useful JSON types](#common-types) for address, name, currency, money, country, phone, among other things.
 
-**Example** 
-```json
-"user" : {
-    "id": 19083974, 
-    "name": "John Doe",
-    "email": "john.doe@psa.com",
-    "age": 19,
-    "roles": ["admin", "editor"],
-    "disabled" : false,
-    "address":{
-        "city": "Paris"
-	}
+#### JSON Primitive Types
+
+JSON Schema [draft-04][9] SHOULD be used to define all fields in APIs. As such, the following notes about the JSON Schema primitive types SHOULD be respected. Following are the guidelines governing use of JSON primitive type representations.
+**String**
+**Number**
+**Array**
+**Null** : APIs MUST NOT produce or consume `null` values.
+
+## Common Types
+
+Resource representations in API MUST reuse the [common data type](tobecompleted) definitions where possible. Following sections provide some details about some of these common types. Please refer to the [schema](tobecompleted) for more details.
+
+### Internationalization
+
+The following common types MUST be used with regard to global country, currency, language and locale.
+
+* [`country_code`](schema/json/draft-04/country_code.json) : all APIs MUST use the [ISO 3166-1 alpha-2](http://www.iso.org/iso/country_codes.htm) two letter country code standard. For instance `FR` corresponds to France.
+* [`currency_code`](schema/json/draft-04/currency_code.json) : currency type MUST use the three letter currency code as defined in [ISO 4217](http://www.currency-iso.org/). For quick reference on currency codes, see [http://en.wikipedia.org/wiki/ISO_4217](http://en.wikipedia.org/wiki/ISO_4217). For instance `EUR` corresponds to Euro.
+* [`language.json`](schema/json/draft-04/language.json) : language type uses [BCP-47](https://tools.ietf.org/html/bcp47) language tag composed of :
+ 	* The ISO-639 alpha-2 language code (Optional) 
+ 	* The ISO-15924 script tag
+ 	* The ISO-3166 alpha-2 country code
+ 	For instance `fr-CA` maps to French as used in Canada (subtag here corresponds to language+region)
+* [`locale.json`](schema/json/draft-04/locale.json) : locale type defines the concept of locale, which is composed of `country_code` and `language`. Optionally, IANA timezone can be included to further define the locale.
+* [`province.json`](schema/json/draft-04/province.json) : province type provides detailed definition of province or state, based on [ISO-3166-2](https://en.wikipedia.org/wiki/ISO_3166-2) country subdivisions, with room for variant local, international, and abbreviated representations of province names. Useful for logistics, statistics, and building state pull-downs for on-boarding.
+
+### Date, Time and Timezone
+
+When dealing with date and time, all APIs MUST conform to the following guidelines.
+
+* The date and time string MUST conform to the `date-time` universal format defined in section `5.6` of [RFC3339](https://www.ietf.org/rfc/rfc3339.txt)[21]
+
+* All APIs MUST only emit [UTC](https://en.wikipedia.org/wiki/Coordinated_Universal_Time) time (aka [Zulu time](https://en.wikipedia.org/wiki/List_of_military_time_zones) or [GMT](https://en.wikipedia.org/wiki/Greenwich_Mean_Time)) in the responses.
+
+* When processing requests, an API SHOULD accept `date-time` or time fields that contain an offset from UTC. For example, `2016-09-28T18:30:41.000+05:00` SHOULD be accepted as equivalent to `2016-09-28T13:30:41.000Z`. This helps ensure compatibility with third parties who may not be capable of normalizing values to UTC before sending requests. In such cases the offset SHOULD only be used to calculate the equivalent UTC time before it is persisted in the system (because of known platform/language/DB interoperability issues). A UTC offset MUST NOT be used to derive anything else. 
+ 
+* The timezone string MUST be per [IANA timezone database](https://www.iana.org/time-zones) (aka **Olson** database or **tzdata** or **zoneinfo** database), for example *America/Los_Angeles* for Pacific Time, or *Europe/Berlin* for Central European Time.
+
+* When expressing [floating](https://www.w3.org/International/wiki/FloatingTime) time values that are not tied to specific time zones such as user's date of birth, expiry date, publication date etc. in requests or responses, an API SHOULD NOT associate it with a timezone. The reason is that a UTC offset changes the meaning of a floating time value. For examples, all countries with timezones west of prime meridian would consider a floating time value to be the previous day.
+
+### Date Time Common Types
+
+The following common types MUST be used to express various date-time formats:
+
+* [`date_time.json`](schema/json/draft-04/date_time.json) SHOULD be used to express an RFC3339 `date-time`.
+* [`date_no_time.json`](schema/json/draft-04/date_no_time.json) SHOULD be used to express `full-date` from RFC 3339.
+* [`time_nodate.json`](schema/json/draft-04/time_nodate.json) SHOULD be used to express `full-time` from RFC3339.
+* [`date_year_month.json`](schema/json/draft-04/date_year_month.json) SHOULD be used to express a floating date that contains only the **month** and **year**. For example, card expiry date (`2016-09`).
+* [`time_zone.json`](schema/json/draft-04/time_zone.json) SHOULD be used for expressing timezone of a RFC3339 `date-time` or a `full-time` field.
+
+## Error Handling
+
+The HTTP status codes in the `4xx` range indicate client-side errors (validation or logic errors), while those in the `5xx` range indicate server-side errors (usually defect or outage). However, these status codes and human readable reason phrase are not sufficient to convey enough information about an error in a machine-readable manner. To resolve an error, non-human consumers of RESTful APIs need additional help.
+
+Therefore, APIs MUST return a JSON error representation that conforms to the [`error.json`](tobecompleted) schema. 
+
+### Error Schema 
+
+An error response following `error.json` as schema MUST include the following fields:
+
+* `name`: A human-readable, unique name for the error. Should be mapped on the server side to insure consistency.
+* `debug_id`: A unique error identifier generated on the server-side and logged for correlation purposes.
+* `message`: A human-readable message, describing the error. This message MUST be a description of the problem NOT a suggestion about how to fix it. It is recommended that this value would be retrieved from the error catalog [`error_spec.json#message`][24] before sending the error response.
+* `_links`: [HATEOAS](#hypermedia) links (in HAL format) specific to an error scenario. Use these links to provide more information about the error scenario and how to resolve it. 
+
+An error response MUST NOT include any of the following information : 
+* Internal code
+* File path
+* Stack trace
+
+## Hypermedia
+
+### HATEOAS
+
+Hypermedia, an extension of the term [hypertext](https://en.wikipedia.org/wiki/Hypertext), is a nonlinear medium of information which includes graphics, audio, video, plain text and hyperlinks according to [wikipedia](https://en.wikipedia.org/wiki/Hypermedia). Hypermedia As The Engine Of Application State (`HATEOAS`) is a constraint of the REST application architecture described by Roy Fielding in his [dissertation](https://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm).
+
+In the context of RESTful APIs, a client could interact with a service entirely through hypermedia provided dynamically by the service. A hypermedia-driven service provides representation of resource(s) to its clients to navigate the API dynamically by including hypermedia links in the responses. 
+
+**Hypermedias are not mandatory**, however if you have to use it then do it using [HAL](#hal).
+
+### HAL
+
+HAL is a simple format that gives a consistent and easy way to hyperlink between resources in your API. For detailed information on HAL refer to this [link](http://stateless.co/hal_specification.html). In short, HAL provides a set of conventions for expressing hyperlinks in either JSON or XML. 
+
+For simplicity reasons, all APIs using HATEOAS along with HAL formatting MUST only use the following properties. 
+* `_links` : This property contains links related to the current object. For example, a `customer` object using HAL will contain links to the vehicles owned by the user.
+* `_embedded` : This property contains commonly related objects to the current object. This property SHALL BE empty.
+
+#### HAL Examples
+
+```
+GET /cars/9837127  HTTP/1.1
+```
+
+
+**Sample schema for a car object without using HAL**
+
+```
+{
+  "id" : 9837127,
+  "model" : "DS3",
+  "createdAt": "2017-08-10T13:46:39.652+0000",
+  "updatedAt": "2017-08-10T13:46:39.652+0000",
 }
 ```
 
-### Object Key
-
-> **A key or attribute MUST BE unique for any given level of data**
-
- - **Bad example**
-	 ```json
-	GET /customers/19083974  HTTP/1.1
-
-    "customer" : {
-	    "id": 19083974,
-	    "name": "John",
-	    "name": "Doe",	"Bad : using name twice on the same level of data is forbidden"
-	} 
-	```
- - **Good example**
-	 ```json
-    GET /customers/19083974  HTTP/1.1
-    
-    "customer" : {
-	    "id": 19083974,
-	    "name": "John Doe",
-	    "address": {
-		    "name": "Home",	"Good:  this is allowed since it belongs to address and not customer"
-		    "city": "Paris"
-	    }
-	} 
-	```
-
-> **You MUST respect the informational context by using clear and explicit naming and use generic terms reusable in a different context than the application it  was first designed for.**
-
- - **Bad example**
-	 ```json
-	 GET /customers/19083974  HTTP/1.1
-	 
-    "customer" : {
-	    "customeId": 19083974,	"Bad : since a customer could be a different object in a different context"
-	    "home_address" : {		"Bad : not developer friendly as other projects might call it differently"
-		    "city":"Paris"
-	    }
-	} 
-	```
- - **Good example**
-	 ```json
-	 GET /customers/19083974  HTTP/1.1
-	 
-    "customer" : {
-	    "id": 19083974,		"Good: generic naming, can be used in any context"
-	    "address": {		"Good : generic naming"
-		    "name": "Home",	"Good : better naming strategy"
-	    }
-	} 
-	```
-
-### Object Value
-
-> **JSON is a loosely typed format.  Nonetheless, formats MUST BE standardize for any JSON objects (see payload conventions)**
-
-In JSON, values must be one of the following data types:
- - a string :  `{ "name":"John" }`
- - a number `{ "age": 19 }`
- -  an object (JSON object) `"address" : { "name": "Home" }` 
- - an array `"roles" : ["admin", "editor"]`
- - a boolean  `"disabled" : false`
- - null `"address" : null`
-
-> **Null objects MUST NOT be included in a JSON response because it decreases payload size and facilitates API/resource evolution**
-
- - **Bad example**
-	 ```json
-	GET /customers/19083974  HTTP/1.1
-	
-    "customer" : {
-	    "id": 19083974, 
-	    "address" : null	"Bad : do not return if null"
-	} 
-	```
- - **Good example**
-	 ```json
-	 GET /customers/19083974  HTTP/1.1
-	 
-    "customer" : {
-	    "id": 19083974,
-	} 
-	```
-## Handling Multiple Formats
-
-> **In the case where APIs serve more than one content type, consumers MUST specify type they need using Accept header**
-
-APIs MAY take as **input or output any content type needed** (an audio file, a specific text format etc.)  Each API endpoint **specifies what response type it outputs and what it consumes** in cases where it applies (for POST requests for instance) :
+**Sample schema for a car object using HAL**
 
 ```
-GET /URL  HTTP/1.1	 
-Accept : text/*
-```
-```
-HTTP/1.1 200 OK	 
-Accept : text/html
+{
+  "_links": {
+    "self": {
+      "href": "/cars/9837127"
+    }
+    ...
+  },
+  "id" : 9837127,
+  "model" : "DS3",
+  "createdAt": "2017-08-10T13:46:39.652+0000",
+  "updatedAt": "2017-08-10T13:46:39.652+0000",
+  "_embedded": {
+    "owner": {
+      "_links": {
+        "self": {
+          "href": "/customers/0981233"
+        }
+      }, 
+      "id": "0981233",
+      "name": "John Doe"
+    }
+}
 ```
 
-See complete list of [MIME Types](https://developer.mozilla.org/fr/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Complete_list_of_MIME_types)
+For additional examples, please refer to this [list of public hypermedia APIs using HAL](https://github.com/mikekelly/hal_specification/wiki/APIs)
 
+Example of existing PSA APIs using HAL : [Connected Car 2.0.0](https://developer-preprod.psa-peugeot-citroen.com/inc/node/644)
 
+#### Paginating With HAL
+
+Pagination can be made easier for the consumer by returning preformatted URIs to fetch the **next** and **previous** pages. All APIs using hypermedia MUST perform pagination using HAL.
+
+```
+GET /cars/  HTTP/1.1
+```
+
+**Sample schema for a list of car objects using HAL**
+*Using Offset/Limit pagination : if an API uses cursors, include hash instead*
+
+```json 
+
+{
+  "_links": {
+    "self": {
+      "href": "/cars"
+    },
+    "first": {
+      "href": "/cars?offset=0"
+    },
+    "next": {
+      "href": "/cars?offset=10&limit=10"
+    },
+    "prev": {
+      "href": "/cars?offset=0"
+    },
+    "last": {
+      "href": "/cars?offset=90&limit=10"
+    }
+  },
+  "total": 100,
+  "_embedded": {
+    "trips": [{...}]
+  }
+}     
+```
+ 
 
 # API Endpoint
 
@@ -313,7 +381,7 @@ APIs at PSA must always have the following components :
 
 **Example** : API called `factory` under the `manufacturing` domain. This specific endpoint addresses `v1` of the API and accesses the ressource `customers` (filtering by name `John`) 
 
-    https:// api.mpsa.com/manufacturing/factory/v1/customers?name=john
+    https:// api.mpsa.com/manufacturing/v1/factory/customers?name=john
 
 ## URI Naming Rules
 
@@ -509,59 +577,7 @@ The ideal cursor is an **encoded timestamp** of the item, since it is satisfies 
 
 ### Pagination &  Hypermedias
 
-If your API uses [hypermedias](tobecompleted) (HAL), pagination can be made easier for the consumer by returning preformatted URIs to fetch the **next** and **previous** pages like so : 
-
- **Using offset/limit**
-
-```
-GET /customers/  HTTP/1.1
-```
-
-```json 
-
-{
-	"data": [
-		{"name": "John Doe", "..."},
-		{"name": "Mark Long", "..."},
-		{"name": "Helen Ping", "..."},
-		{"name": "Chris Temp", "..."},
-		{"name": "Simon Hillman", "..."}
-	],
-	"count": 25,
-	"offset" : 0,
-	"total" : 200,
-	"_links": {
-		"previous" : "http://api.mpsa.com/customers?offset=0&limit=25",
-		"next" : "http://api.mpsa.com/customers?offset=25&limit=25"
-	}
-}
-```
- 
- **Using after/before cursor**
-
-```
-GET /customers/  HTTP/1.1
-```
-
-```json 
-{
-	"data": [
-		{"name": "John Doe", "..."},
-		{"name": "Mark Long", "..."},
-		{"name": "Helen Ping", "..."},
-		{"name": "Chris Temp", "..."},
-		{"name": "Simon Hillman", "..."}
-	],
-	"before" : "NDMyNzQyODI3OTQw1j3",
-	"after" : "MTAxNTExOTQ1MjAwNzI", 
-	"count": 25,
-	"total" : 200,
-	"_links": {
-		"previous" : "http://api.mpsa.com/customers?before=NDMyNzQyODI3OTQw1j3&limit=25",
-		"next" : "http://api.mpsa.com/customers?after=MTAxNTExOTQ1MjAwNzI&limit=25"
-	}
-}
-```
+See [Paginating With HAL](#paginating-with-hal)
 
 ## Caching
 
@@ -644,16 +660,16 @@ API’s are versioned products and MUST adhere to the following versioning princ
 ## Version Invocation 
 
 There are two main ways to version an API (see next slide), either invoke the version in the :
- - **URL** : developers MUST invoke the API version in the url of the request : 
+ - **URL** : APIs MUST invoke the version in the url of the request : 
     ```
-    https://api.mpsa.com/manufacturing/factory/v1/customers/456
+    https://api.mpsa.com/manufacturing/factory/customers/456
     ```
 
  	 - Cleaner approach, less error prone
 	 - Consumers don’t need to handle HTTP headers (which can be tough for some clients)
 	 - More explorable : easier testing with a simple browser
 
- - **HTTP Header**
+ - **HTTP Header** : APIs MUST NOT invoke the version in the header as it is more prone to errors and not developer friendly 
 	``` 
 	Accept: application/json;version=1
     https://api.mpsa.com/customers/456
