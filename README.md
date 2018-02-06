@@ -533,7 +533,7 @@ GET /customers/  HTTP/1.1
 ```
  
  **Using after/before cursor**
- 
+
 ```
 GET /customers/  HTTP/1.1
 ```
@@ -560,10 +560,11 @@ GET /customers/  HTTP/1.1
 
 ## Caching
 
+The ability to cache and reuse previously fetched resources is a critical aspect of optimizing for performance.  Every browser comes with an implementation of an HTTP cache. Developers MUST ensure that each server response provides the correct HTTP header directives to instruct the browser on when and for how long the browser can cache the response. 
 
 ### Caching headers
 
-The ability to cache and reuse previously fetched resources is a critical aspect of optimizing for performance.  Every browser comes with an implementation of an HTTP cache. Developers only need to ensure that each server response provides the correct HTTP header directives to instruct the browser on when and for how long the browser can cache the response. The following table provides information regarding caching techniques :
+The following table provides information regarding caching techniques :
 
 |Header  | Definition |
 |--|--|
@@ -576,7 +577,7 @@ The ability to cache and reuse previously fetched resources is a critical aspect
 
 ### Caching policies
 
-There's no one best cache policy. You must take several parameters into account while working on caching strategy : traffic patterns, type of data served and application-specific requirements for data freshness. API developers and designers MUST define and configure the appropriate per-resource settings, as well as the overall "caching hierarchy.“ : try to find a balance between good and bad reactivity depending on the resource type. API designers MUST determine the best cache hierarchy for their API : the combination of resource URLs with content fingerprints (Etag) and short or no-cache lifetimes allows you to control how quickly the client picks up updates.
+ API developers and designers MUST define and configure the appropriate per-resource settings, as well as the overall "caching hierarchy." : try to find a balance between good and bad reactivity depending on the resource type. API designers MUST determine the best cache hierarchy for their API : the combination of resource URLs with content fingerprints (Etag) and short or no-cache lifetimes allows you to control how quickly the client picks up updates.
 
 #### Caching dynamic data
 
@@ -601,8 +602,17 @@ You can choose not to cache response, in real-time systems for examples, however
 
 ### Caching strategy 
 
-Graph
+There's no one best cache strategy. API designers and developers MUST take several parameters into account while working on caching strategy : 
+ - **type of data served** : as we've seen before, dynamic and static data will not have the same caching policy.
+ - **traffic patterns** : caching was designed to optimize performances by limiting server calls - if your API is used be a few consumers, caching might not be as critical as if your API was used by millions of people.
+ - **application-specific requirements for data freshness** : caching is application specific, meaning that a resource might not be cached the same way across all applications.
+ *example* : a GPS location might not be cached the ame way in :  
+  - Real-time applications (Waze for instance) : data has ~1sec or less lifetime
+  - A car dealership application to know approximately where the car is located : data has a ~1min lifetime
 
+Developers SHALL refer to this diagram when deciding on which caching technique to choose
+
+<img src="https://raw.githubusercontent.com/GroupePSA/api-standards/master/examples/caching/caching-decision-tree.png" width="800">
 
 # License
 
