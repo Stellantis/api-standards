@@ -59,6 +59,8 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
    - [Versioning Policies](#versioning-policies)
    - [Version Invocation](#version-invocation)
  - [Performance & Asynchronism](#perform---asynchronism)
+   - [Operation Completion Notification](#operation-completion-notification)
+   - [Asynchronism Patterns](#asynchronism-patterns)
 
 # HTTP Protocol
 
@@ -686,8 +688,6 @@ There are two main ways to version an API (see next slide), either invoke the ve
 
 Certain types of operations might require processing of the request in an asynchronous manner in order to avoid long delays on the client side and prevent long-standing open client connections waiting for the operations to complete. Usually, asynchronism should be considered when a delays exceed 400ms. If that is the case, API designers should ask themselves if such delay is problematic or not.  
 
-For such use cases, APIs MUST employ the following pattern:
-
 ## Operation Completion Notification
 
 There exists multiple ways to notify the API consumer that the operation has finished executing :
@@ -696,6 +696,8 @@ There exists multiple ways to notify the API consumer that the operation has fin
 * **Web Hooks** : force the consumer to implement web hooks to retrieve the operation's response. While this solution is ideal, consumer might not always support it.  
 
 ## Asynchronism Patterns
+
+In use cases where asynchronism is necessary, APIs MUST employ the following pattern :
 
 **For `POST` requests :**
 
