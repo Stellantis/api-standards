@@ -245,7 +245,7 @@ An error response MUST include the following fields:
 
 * `name`: A human-readable, unique name for the error. Should be mapped on the server side to insure consistency.
 * `debug_id`: A unique error identifier generated on the server-side and logged for correlation purposes.
-* `message`: A human-readable message, describing the error. This message MUST be a description of the problem NOT a suggestion about how to fix it. It is recommended that this value would be retrieved from the error catalog [`error_spec.json#message`][24] before sending the error response.
+* `message`: A human-readable message, describing the error. This message MUST be a description of the problem NOT a suggestion about how to fix it.
 * `information_link`: [HATEOAS](#hypermedia) links (in HAL format) specific to an error scenario. Use these links to provide more information about the error scenario and how to resolve it. 
 
 An error response MUST NOT include any of the following information : 
