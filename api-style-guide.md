@@ -693,7 +693,7 @@ Certain types of operations might require processing of the request in an asynch
 There exists multiple ways to notify the API consumer that the operation has finished executing :
 * **Polling** : force the consumer to poll until the operation has finished executing
 * **External Notifications** : notify the operation completion via external notifications such as email, text message etc. Mostly used in cases where the consumer is a human.
-* **Web Hooks** : force the consumer to implement web hooks to retrieve the operation's response. While this solution is ideal, consumer might not always support it.  
+* **Webhooks** : force the consumer to implement web hooks to retrieve the operation's response. While this solution is ideal, consumer might not always support it.  
 
 ## Asynchronism Patterns
 
@@ -731,7 +731,6 @@ APIs that support both synchronous and asynchronous operations for a particular 
 * If the request doesn't contain a `Prefer=respond-async` header, the service MUST process the request synchronously.
 
 It is desirable that all APIs that implement asynchronous processing, also support [webhooks](https://en.wikipedia.org/wiki/Webhook) as a mechanism of pushing the processing status to the client.
-
 
 # License
 
