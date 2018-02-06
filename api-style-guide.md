@@ -369,14 +369,11 @@ GET /cars/  HTTP/1.1
 }     
 ```
  
-
 # API Endpoint
-
-> **URIs must be normalized and construction rules should be followed at the Group level**
 
 ## URI Structure
 
-APIs at PSA must always have the following components : 
+APIs at PSA MUST be be formatted with the following components : 
  - **protocol** : must always be `https`
  - **environment** : could be `prod`, `preprod` or `dev`
  - **api** : specifies that this specific URI is an API endpoint
@@ -397,24 +394,26 @@ APIs at PSA must always have the following components :
 
 ## URI Naming Rules
 
-> **The URI or API endpoint must not contain actions or verbs. URIs must contain the plural form of resources and the HTTP method should define the kind of action to be performed on the resource.**
+All API URIs MUST follow the rules listed below :
+1. MUST NOT contain actions or verbs
+2. MUST contain the plural form of resources
+3. HTTP methods SHALL define the kind of action to be performed on the resource
 
-Let’s consider a **Customer** resource on which we would like to perform several actions such as **list**, **update**, **delete** and **promote**. We could define our API in a way that each URI corresponds to an operation as follows :
-
- - `GET `**`/getCustomers`** : **return** all customers 
- - `GET `**`/deleteCustomer`** : **delete** a customer (using `GET` here because we are not sending any data)
- - `GET `**`/promoteCustomer`** : **promote** a customer (using `GET` here because we are not sending any data)
- - `POST `**`/createCustomer`** : **create** customer according to the request **body**
- - `POST `**`/updateCustomer`** : **update** customer according to the request **body**
+Let’s consider a **Customer** resource on which we would like to perform several actions such as `list`, `update`, `delete` and `promote`. The API could be defined in a way that each endpoints corresponds to an operation as follows :
+* `GET `**`/getCustomers`** : **return** all customers 
+* `GET `**`/deleteCustomer`** : **delete** a customer (using `GET` here because we are not sending any data)
+* `GET `**`/promoteCustomer`** : **promote** a customer (using `GET` here because we are not sending any data)
+* `POST `**`/createCustomer`** : **create** customer according to the request **body**
+* `POST `**`/updateCustomer`** : **update** customer according to the request **body**
 
 **What is wrong with this implementation ?**
-> **The URI or API endpoint must not contain actions or verbs. URIs must contain the plural form of resources and the HTTP method should define the kind of action to be performed on the resource.** 
-> 
-> There will be as many endpoints as there are operations to perform and many of these endpoints will contain redundant actions. **This leads to unmaintainable APIs**
+
+* The API endpoint MUST NOT contain actions or verbs. URIs must contain the plural form of resources and the HTTP method should define the kind of action to be performed on the resource.
+* There will be as many endpoints as there are operations to perform and many of these endpoints will contain redundant actions. This leads to unmaintainable APIs.
 
 **What is the correct way ?**
 
-If we do not use verbs in URIs, how can we tell the server about the actions to be performed on a given resource (Customer for instance) ? **This is where the HTTP methods (or verbs as seen before) play the role**. Let's consider the same example following **REST** rules :
+If verbs cannot be used in URIs, how can endpoints tell the server about the actions to be performed on a given resource ? This is where the HTTP methods (or verbs as seen before) play the role. Let's consider the same example following REST rules :
 
  - **`GET`**`/customers` : **return** all customers 
  - **`GET`**`/customers/456` : **return** customer with id #456 
@@ -431,12 +430,11 @@ There are multiple ways of working around this, choose the one that makes sense 
  2. RESTful way : `PATCH /customers/456/grade` which will partially update a resource called **Grade** that is associated to the user 
  3. Non-RESTful way though it is clean : `POST /customers/456/promote` this contains a verb and isn't considered RESTful though it is semantically clean and explicit. 
 
-**What is wrong with this implementation ?**
-> APIs are more **precise** and **consistent**. They are **easier to understand** both for humans and machines and thus are **maintainable**. 
+**What is better with this implementation ?**
+
+APIs are more **precise** and **consistent**. They are **easier to understand** both for humans and machines and thus are **maintainable**. 
 
 ## URI Parameters 
-
-> **Follow common principles to choose whether to use a path a query or a header parameter to perform specific actions.**
 
 ### Path Parameters
 
@@ -468,7 +466,7 @@ There are multiple ways of working around this, choose the one that makes sense 
 
 ### Filtering
 
->  Filtering allows consumers to only fetch data that matches their conditions.
+Filtering allows consumers to only fetch data that matches their conditions. Filtering MUST be done using `GET` requests.
 
  - **Single-Value / Single-Criteria Filtering** 
  `GET /customers?name=John` : get all customers whose names is `John`
@@ -481,7 +479,7 @@ There are multiple ways of working around this, choose the one that makes sense 
  
 ### Selecting 
 
->  Selecting fields allows consumers to only fetch data they need **within a resource**. This mechanism is really useful when dealing with bad internet connection. To select fields simply specify them in the URI.
+Selecting fields allows consumers to only fetch data they need within a resource. This mechanism is really useful when dealing with bad internet connection. To select fields simply specify them in the URI. Selecting MUST be done using `GET` requests.
 
 **Example** : `GET /customers?fields=id,address(city)` only fetch `id` and `address` with `city` only of customer `456` :
 
@@ -496,29 +494,34 @@ There are multiple ways of working around this, choose the one that makes sense 
 
 ### Sorting
 
->  Sorting allows consumers to fetch data in the order they need. The API will respond with the data in the order specified in the request.
+Sorting allows consumers to fetch data in the order they need. The API will respond with the data in the order specified in the request. Sorting MUST be done using `GET` requests.
 
-**Example** : `GET /customers?sort=name` fetch all customers and sort by `name` (by default sorting is ascending)
-
-**Example** : `GET /customers?sort=name,age` fetch all customers and sort by `name` and `age`
-
-**Example** : `GET /customers?sort=age&desc=age` fetch all customers and sort by `age` in `desc` order 
+**Examples** : 
+* `GET /customers?sort=name` fetch all customers and sort by `name` (by default sorting is ascending)
+* `GET /customers?sort=name,age` fetch all customers and sort by `name` and `age`
+* `GET /customers?sort=age&desc=age` fetch all customers and sort by `age` in `desc` order 
 
 
 ## Pagination
 
+When the dataset is too large, well designed APIs divide the data set into smaller chunks, which helps in improving the performance and makes it easy for the consumer to handle the response. While there exist several pagination techniques, all APIs MUST use either of the two techniques presented below. 
+
 ### Offset/Limit pagination
 
-> This pagination technique is the easiest to implement and **SHALL BE used by default**. You MUST choose a default number of items to be returned  (that would mean a default *limit*).
+This technique SHALL be used by default. API consumers simply need to specify :
+* An `offset` (or `page`): the start position of the concerned list of data
+* A `limit` : the number of items to be retrieved. Note that a default limit MUST be set. 
 
-    GET /customers?offset=5&limit=8 
-    
-    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
-                 ^----------------------^
-                 offset	                limit
+```
+GET /customers?offset=5&limit=8 
+
+[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+               ^-------------------------^
+             offset                    limit
                  
-    Returns [4, 5, 6, 7, 8, 9, 10, 11] 
-     
+Returns [4, 5, 6, 7, 8, 9, 10, 11]
+```
+
 **Request**
 
     GET /customers/  HTTP/1.1
@@ -539,6 +542,7 @@ There are multiple ways of working around this, choose the one that makes sense 
 	"total" : 200 
 }
 ```
+
 **Drawbacks of offset/limit**
 
 For mostly static content where items don’t move between pages frequently, offset/limit is great. But it isn't always the case,  specifically because items are sometimes added and removed while the user is navigating to different pages. Here's what can happen when using offset/limit on dynamic data  :
@@ -554,9 +558,9 @@ Though offset/limit can be used in 90% of the cases, it also means that for cert
 
 ### Cursor-based pagination
 
-> This pagination technique is is bit more complicated to implement though it **MUST BE be used when dealing with real time data.** 
+This pagination technique is is bit more complicated to implement. However, all APIs MUST use this pagination technique when dealing with real time data for the reasons explained above.
 
-In the example above, if could have specified the exact position in the list we want to begin with, and the number of items we wanted to fetch, we would not have ran into these issues. With this technique, no matter how many items were removed or added to the top of the list , we still have a constant pointer to the exact position where we left off. This pointer is called a **cursor**. A cursor is a unique object identifier that sets the starting point of the pagination until the specified limit. 
+In the example above, if we could have specified the exact position in the list we want to begin with, and the number of items we wanted to fetch, we would not have ran into these issues. With this technique, no matter how many items were removed or added to the top of the list , we still have a constant pointer to the exact position where we left off. This pointer is called a **cursor**. A cursor is a unique object identifier that sets the starting point of the pagination until the specified limit. 
 
 **Request**
 
