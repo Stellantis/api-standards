@@ -614,13 +614,13 @@ This table summarizes the most used caching techniques :
 
 ### Caching policies
 
- API developers and designers MUST define and configure the appropriate per-resource settings, as well as the overall "caching hierarchy." : try to find a balance between good and bad reactivity depending on the resource type. API designers MUST determine the best cache hierarchy for their API : the combination of resource URLs with content fingerprints (Etag) and short or no-cache lifetimes allows you to control how quickly the client picks up updates.
+API developers and designers MUST define and configure the appropriate per-resource settings, as well as the overall "caching hierarchy." : try to find a balance between good and bad reactivity depending on the resource type. API designers MUST determine the best cache hierarchy for their API : the combination of resource URLs with content fingerprints (Etag) and short or no-cache lifetimes allows you to control how quickly the client picks up updates.
 
 #### Caching dynamic data
 
 You cannot cache for long periods of time, such as: days, hours or sometimes even minutes because data becomes stale too quickly. That doesn't mean, however, that such data shouldn't be cached at all. When caching resources for short periods of time you should be using HTTP caching instructions that do not rely on shared understanding of time, such as `Cache-Control : max-age`, `Expires` and `ETags`
 
-> Dynamic data is data that is often changing  includes GPS location, battery voltage, tire pressure etc. 
+> Dynamic data is data that is often changing includes GPS location, battery voltage, tire pressure etc. 
 
 #### Caching near-static data
 
@@ -686,11 +686,10 @@ There are two main ways to version an API (see next slide), either invoke the ve
 	 - More explorable : easier testing with a simple browser
 
  - **HTTP Header** : APIs MUST NOT invoke the version in the header as it is more prone to errors and not developer friendly 
-	``` 
-	Accept: application/json;version=1
+	  ``` 
+	  Accept: application/json;version=1
     https://api.mpsa.com/customers/456
     ```  
-
 
 # Performance & Asynchronism
 
@@ -729,7 +728,6 @@ Like `POST`, you can support `PUT`/`PATCH`/`DELETE`/`GET` to be asynchronous. Th
 	* A temporary request queue URI where the status of the operation may be obtained via some temporary identifier. Clients SHOULD make an HTTP `GET` request to obtain the status of the operation which MAY include such information as completion state, ETA, and final URI once it is completed.
        
     `{ "rel": "self", "href": "/v1/queue/requests/{request_id}, "method": "GET" }"`
-
 
 **APIs that support both synchronous and asynchronous processing for an URI:**
 
