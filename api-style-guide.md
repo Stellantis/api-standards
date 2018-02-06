@@ -196,57 +196,42 @@ For each HTTP method, API developers SHOULD use only status codes marked as "X" 
 
 ## JSON Types
 
-This section provides guidelines related to usage of [JSON primitive types](#json-primitive) as well as [commonly useful JSON types](#common-types) for address, name, currency, money, country, phone, among other things.
+This section provides guidelines related to usage of [JSON primitive types](#json-primitive) as well as [commonly useful JSON types](#common-types) for address, name, currency, money, country, phone, among other things. APIs MUST follow common formatting rules to insure consistency across all projects.
 
 ### JSON Primitive Types
 
-JSON Schema [draft-04][9] SHOULD be used to define all fields in APIs. As such, the following notes about the JSON Schema primitive types SHOULD be respected. Following are the guidelines governing use of JSON primitive type representations.
-**String**
-**Number**
-**Array**
-**Null** : APIs MUST NOT produce or consume `null` values.
+As per [draft-04](https://tools.ietf.org/html/draft-zyp-json-schema-04#section-3.5) JSON Schema defines seven primitive types for JSON values:
+* **array** : A JSON array.
+* **boolean** : A JSON boolean.
+* **integer** : A JSON number without a fraction or exponent part.
+* **number** : Any JSON number.  Number includes integer.
+* **null** : The JSON null value.
+* **object** : A JSON object.
+* **string** : A JSON string.
 
 ### Common Types
 
-Resource representations in API MUST reuse the [common data type](tobecompleted) definitions where possible. Following sections provide some details about some of these common types. Please refer to the [schema](tobecompleted) for more details.
+Resource representations in API MUST reuse the common data type definitions below where possible. Following sections provide some details about some of these common types. Please refer to the [schema](tobecompleted) for more details.
 
 #### Internationalization
 
 The following common types MUST be used with regard to global country, currency, language and locale.
 
-* [`country_code`](schema/json/draft-04/country_code.json) : all APIs MUST use the [ISO 3166-1 alpha-2](http://www.iso.org/iso/country_codes.htm) two letter country code standard. For instance `FR` corresponds to France.
-* [`currency_code`](schema/json/draft-04/currency_code.json) : currency type MUST use the three letter currency code as defined in [ISO 4217](http://www.currency-iso.org/). For quick reference on currency codes, see [http://en.wikipedia.org/wiki/ISO_4217](http://en.wikipedia.org/wiki/ISO_4217). For instance `EUR` corresponds to Euro.
-* [`language.json`](schema/json/draft-04/language.json) : language type uses [BCP-47](https://tools.ietf.org/html/bcp47) language tag composed of :
- 	* The ISO-639 alpha-2 language code (Optional) 
- 	* The ISO-15924 script tag
- 	* The ISO-3166 alpha-2 country code
- 	For instance `fr-CA` maps to French as used in Canada (subtag here corresponds to language+region)
-* [`locale.json`](schema/json/draft-04/locale.json) : locale type defines the concept of locale, which is composed of `country_code` and `language`. Optionally, IANA timezone can be included to further define the locale.
-* [`province.json`](schema/json/draft-04/province.json) : province type provides detailed definition of province or state, based on [ISO-3166-2](https://en.wikipedia.org/wiki/ISO_3166-2) country subdivisions, with room for variant local, international, and abbreviated representations of province names. Useful for logistics, statistics, and building state pull-downs for on-boarding.
-
-#### Date, Time and Timezone
-
-When dealing with date and time, all APIs MUST conform to the following guidelines.
-
-* The date and time string MUST conform to the `date-time` universal format defined in section `5.6` of [RFC3339](https://www.ietf.org/rfc/rfc3339.txt)[21]
-
-* All APIs MUST only emit [UTC](https://en.wikipedia.org/wiki/Coordinated_Universal_Time) time (aka [Zulu time](https://en.wikipedia.org/wiki/List_of_military_time_zones) or [GMT](https://en.wikipedia.org/wiki/Greenwich_Mean_Time)) in the responses.
-
-* When processing requests, an API SHOULD accept `date-time` or time fields that contain an offset from UTC. For example, `2016-09-28T18:30:41.000+05:00` SHOULD be accepted as equivalent to `2016-09-28T13:30:41.000Z`. This helps ensure compatibility with third parties who may not be capable of normalizing values to UTC before sending requests. In such cases the offset SHOULD only be used to calculate the equivalent UTC time before it is persisted in the system (because of known platform/language/DB interoperability issues). A UTC offset MUST NOT be used to derive anything else. 
- 
-* The timezone string MUST be per [IANA timezone database](https://www.iana.org/time-zones) (aka **Olson** database or **tzdata** or **zoneinfo** database), for example *America/Los_Angeles* for Pacific Time, or *Europe/Berlin* for Central European Time.
-
-* When expressing [floating](https://www.w3.org/International/wiki/FloatingTime) time values that are not tied to specific time zones such as user's date of birth, expiry date, publication date etc. in requests or responses, an API SHOULD NOT associate it with a timezone. The reason is that a UTC offset changes the meaning of a floating time value. For examples, all countries with timezones west of prime meridian would consider a floating time value to be the previous day.
+| Type            | Example | Rule | 
+|-----------------|---------|------|
+| `country_code`  | `FR`    | All APIs MUST use the [ISO 3166-1 alpha-2](http://www.iso.org/iso/country_codes.htm) two letter country code standard |
+| `currency_code` | `EUR`   | All APIs MUST use the the three letter currency code as defined in [ISO 4217](http://www.currency-iso.org/). For quick reference on currency codes, see [http://en.wikipedia.org/wiki/ISO_4217](http://en.wikipedia.org/wiki/ISO_4217). |
+| `language.json` | `fr-FR` | All APIs MUST use the [BCP-47](https://tools.ietf.org/html/bcp47) language tag composed of : the `ISO-639 alpha-2 language code` (Optional), the `ISO-15924` script tag, the `ISO-3166 alpha-2` country code |
 
 #### Date Time Common Types
 
 The following common types MUST be used to express various date-time formats:
 
-* [`date_time.json`](schema/json/draft-04/date_time.json) SHOULD be used to express an RFC3339 `date-time`.
-* [`date_no_time.json`](schema/json/draft-04/date_no_time.json) SHOULD be used to express `full-date` from RFC 3339.
-* [`time_nodate.json`](schema/json/draft-04/time_nodate.json) SHOULD be used to express `full-time` from RFC3339.
-* [`date_year_month.json`](schema/json/draft-04/date_year_month.json) SHOULD be used to express a floating date that contains only the **month** and **year**. For example, card expiry date (`2016-09`).
-* [`time_zone.json`](schema/json/draft-04/time_zone.json) SHOULD be used for expressing timezone of a RFC3339 `date-time` or a `full-time` field.
+| Type               | Example                | RFC                   | 
+|--------------------|------------------------|-----------------------|
+| `date_time`        | `2018-02-06T19:31:29`  | RFC3339 `date-time`   |
+| `date_no_time`     | `2018-02-06`           | RFC3339 `full-date`   |
+| `time_nodate`      | `19:31:29`             | RFC3339 `full-time`   |
 
 ## Error Handling
 
@@ -256,17 +241,28 @@ Therefore, APIs MUST return a JSON error representation that conforms to the [`e
 
 ### Error Schema 
 
-An error response following `error.json` as schema MUST include the following fields:
+An error response MUST include the following fields:
 
 * `name`: A human-readable, unique name for the error. Should be mapped on the server side to insure consistency.
 * `debug_id`: A unique error identifier generated on the server-side and logged for correlation purposes.
 * `message`: A human-readable message, describing the error. This message MUST be a description of the problem NOT a suggestion about how to fix it. It is recommended that this value would be retrieved from the error catalog [`error_spec.json#message`][24] before sending the error response.
-* `_links`: [HATEOAS](#hypermedia) links (in HAL format) specific to an error scenario. Use these links to provide more information about the error scenario and how to resolve it. 
+* `information_link`: [HATEOAS](#hypermedia) links (in HAL format) specific to an error scenario. Use these links to provide more information about the error scenario and how to resolve it. 
 
 An error response MUST NOT include any of the following information : 
 * Internal code
 * File path
 * Stack trace
+
+**Sample error response**
+
+```
+{  
+   "name":"VALIDATION_ERROR",
+   "debug_id":"123456789",
+   "message":"Invalid data provided",
+   "information_link":"http://developer.psa-peugeot-citroen.com/apidoc#VALIDATION_ERROR"
+}
+```
 
 ## Hypermedia
 
@@ -291,7 +287,6 @@ For simplicity reasons, all APIs using HATEOAS along with HAL formatting MUST on
 ```
 GET /cars/9837127  HTTP/1.1
 ```
-
 
 **Sample schema for a car object without using HAL**
 
