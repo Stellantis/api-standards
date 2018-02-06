@@ -461,7 +461,7 @@ For mostly static content where items don’t move between pages frequently, off
  1. **Displaying the same item twice**. This can happen if a new item was added at the top of the list, causing the skip and limit approach to show the item at the boundary between pages twice.
 
     **Example** : let's consider a list of 6 items **at time t**. The user performs a request to fetch the first page (`GET /items?limit=3`). Now let's say a new item was added at the top of the list and the user performs another request to fetch the second page (`GET /items?limit=3&offset=3`). It the state hadn't changed, he would have gotten the second page with items `[4, 5, 6]`, though he will get a response containing items `[3, 4, 5]`, item 3 being a duplicate.
- <img src="https://raw.githubusercontent.com/GroupePSA/api-standards/master/examples/pagination/paginating-dynamic-data.png" width="600">
+ 	<img src="https://raw.githubusercontent.com/GroupePSA/api-standards/master/examples/pagination/paginating-dynamic-data.png" width="600">
  
  2. **Skipping an item**. Similarly to the example above, if we **remove** an item from the list we'll skip an item. 
  
