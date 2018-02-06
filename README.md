@@ -508,8 +508,11 @@ If your API uses [hypermedias](tobecompleted) (HAL), pagination can be made easi
 
  **Using offset/limit**
 
-```json 
+```
 GET /customers/  HTTP/1.1
+```
+
+```json 
 
 {
 	"data": [
@@ -528,11 +531,14 @@ GET /customers/  HTTP/1.1
 	}
 }
 ```
+ 
  **Using after/before cursor**
+ 
+```
+GET /customers/  HTTP/1.1
+```
 
 ```json 
-GET /customers/  HTTP/1.1
-
 {
 	"data": [
 		{"name": "John Doe", "..."},
