@@ -58,7 +58,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
    - [Semantics](#semantics)
    - [Versioning Policies](#versioning-policies)
    - [Version Invocation](#version-invocation)
- - [Payload Conventions](#payload-conventions)
+ - [Performance & Asynchronism](#perform---asynchronism)
 
 # HTTP Protocol
 
@@ -680,6 +680,55 @@ There are two main ways to version an API (see next slide), either invoke the ve
 	Accept: application/json;version=1
     https://api.mpsa.com/customers/456
     ```  
+
+
+# Performance & Asynchronism
+
+Certain types of operations might require processing of the request in an asynchronous manner in order to avoid long delays on the client side and prevent long-standing open client connections waiting for the operations to complete. Usually, asynchronism should be considered when a delays exceed 400ms. If that is the case, API designers should ask themselves if such delay is problematic or not.  
+
+For such use cases, APIs MUST employ the following pattern:
+
+## Operation Completion Notification
+
+There exists multiple ways to notify the API consumer that the operation has finished executing :
+* **Polling** : force the consumer to poll until the operation has finished executing
+* **External Notifications** : notify the operation completion via external notifications such as email, text message etc. Mostly used in cases where the consumer is a human.
+* **Web Hooks** : force the consumer to implement web hooks to retrieve the operation's response. While this solution is ideal, consumer might not always support it.  
+
+## Asynchronism Patterns
+
+**For `POST` requests :**
+
+* Return the `202 Accepted` HTTP response code.
+* In the response body, include one or more URIs as hypermedia links, which could include:
+    * The final URI of the resource where it will be available in future if the ID and path are already known. Clients can then make an HTTP `GET` request to that URI in order to obtain the completed resource. Until the resource is ready, the final URI SHOULD return the HTTP status code `404 Not Found`. This is equivalent to polling.
+    
+    `{ "rel": "self", "href": "/v1/namespace/resources/{resource_id}", "method": "GET" }`
+    
+    * A temporary request queue URI where the status of the operation may be obtained via some temporary identifier. Clients SHOULD make an HTTP `GET` request to obtain the status of the operation which MAY include such information as completion state, ETA, and final URI once it is completed. This is equivalent to polling.
+    
+    `{ "rel": "self", "href": "/v1/queue/requests/{request_id}, "method": "GET" }"`
+    
+
+**For `PUT`/`PATCH`/`DELETE`/`GET` requests:**
+
+Like `POST`, you can support `PUT`/`PATCH`/`DELETE`/`GET` to be asynchronous. The behaviour would be as follows:
+
+* Return the `202 Accepted` HTTP response code.
+* In the response body, include one or more URIs as hypermedia links, which could include:
+	* A temporary request queue URI where the status of the operation may be obtained via some temporary identifier. Clients SHOULD make an HTTP `GET` request to obtain the status of the operation which MAY include such information as completion state, ETA, and final URI once it is completed.
+       
+    `{ "rel": "self", "href": "/v1/queue/requests/{request_id}, "method": "GET" }"`
+
+
+**APIs that support both synchronous and asynchronous processing for an URI:**
+
+APIs that support both synchronous and asynchronous operations for a particular URI and an HTTP method combination, MUST recognize the [`Prefer`](index.md#http-standard-headers) header and exhibit following behavior:
+
+* If the request contains a `Prefer=respond-async` header, the service MUST switch the processing to asynchronous mode. 
+* If the request doesn't contain a `Prefer=respond-async` header, the service MUST process the request synchronously.
+
+It is desirable that all APIs that implement asynchronous processing, also support [webhooks](https://en.wikipedia.org/wiki/Webhook) as a mechanism of pushing the processing status to the client.
 
 
 # License
