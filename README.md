@@ -645,9 +645,9 @@ API’s are versioned products and MUST adhere to the following versioning princ
 
 There are two main ways to version an API (see next slide), either invoke the version in the :
  - **URL** : developers MUST invoke the API version in the url of the request : 
-	 	- Cleaner approach, less error prone
-		- Consumers don’t need to handle HTTP headers (which can be tough for some clients)
-		- More explorable : easier testing with a simple browser
+ 	 - Cleaner approach, less error prone
+	 - Consumers don’t need to handle HTTP headers (which can be tough for some clients)
+	 - More explorable : easier testing with a simple browser
 
     ```
     https://api.mpsa.com/manufacturing/factory/v1/customers/456
