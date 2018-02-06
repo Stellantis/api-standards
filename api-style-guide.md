@@ -3,7 +3,7 @@
 
 Standards and guidelines for Groupe PSA REST APIs.
 
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119 [RFC2119].
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC2119](https://www.ietf.org/rfc/rfc2119.txt).
 
 # Table Of Contents
 
@@ -64,83 +64,97 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 # HTTP Protocol
 
-REST APIs are designed around the rich HTTP protocol.
-
 ## Allowed HTTP Verbs List
 
-> **Normalize HTTP verbs usage to keep the API intuitive. Only the 5 verbs below SHALL BE used : use the right verb for the right operation to perform** 
+HTTP defines a set of request methods to indicate the desired action to be performed for a given resource. The primary or most-commonly-used HTTP verbs (or methods, as they are properly called) are  `POST`, `GET`, `PUT`, `PATCH` and `DELETE`. There are a number of other verbs, too, but are utilized less frequently. All APIs MUST only use the verbs listed in the table below.
 
-|  Method | Action |
-|--|--|
-|  `GET` | Method **requests data** from the resource and should not produce any side effect |
-|  `POST` | Method requests the server to **create** a resource in the database |
-|  `PUT` | Method requests the server to **update** resource or **create** the resource, if it doesn’t exist |
-|  `PATCH` | Method requests the server to **partially update** resource |
-|  `DELETE` | Method requests that the resources, or its instance, **should be removed** from the database|
-
+|  Method 	| Action 																							|
+|-----------|---------------------------------------------------------------------------------------------------|
+|  `POST` 	| Method requests the server to **create** a resource in the database 								|
+|  `GET` 	| Method **requests data** from the resource and should not produce any side effect					|
+|  `PUT` 	| Method requests the server to **update** resource or **create** the resource, if it doesn’t exist |
+|  `PATCH` 	| Method requests the server to **partially update** resource 										|
+|  `DELETE` | Method requests that the resources, or its instance, **should be removed** from the database		|
 
 ## Idempotent & Safe 
 
-> **Keep idempotent and safe principles in mind when developing APIs. HTTP verbs that are idempotent MUST NOT lead to non idempotent operations and vice versa.** 
-
-
 ### Idempotent
 
-An idempotent HTTP method is a HTTP method that **can be called many times without different outcomes**. It would not matter if the method is called only once, or ten times over. **The result MUST BE the same**. 
+Idempotency is an important aspect of building a fault-tolerant API. Idempotent APIs enable clients to safely retry an operation without worrying about the side-effects that the operation can cause. For example, a client can safely retry an idempotent request in the event of a request failing due to a network connection error.
 
-**Example**
+Per [HTTP Specification](https://tools.ietf.org/html/rfc2616#section-9.1.2), a method is idempotent if the side-effects of more than one identical requests are the same as those for a single request. Methods `GET`, `HEAD`, `PUT` and `DELETE` are defined idempotent.
+
+**Example** - The following statement is **idempotent** : no matter how many times we execute this statement, the customer’s age will always be set to 20.
 
     customer.age = 20 // idempotent
 
-> This example  is **idempotent** : no matter how many times we execute this statement, the customer’s age will always be set to 20. 
+**Example** -  The following statement is **not idempotent** : executing this 10 times will result in different outcomes.
 
     customer.age += 1 // non-idempotent
 
-> The second line **isn't idempotent** : executing this 10 times will result
-    in a different outcome as when running 5 times.
- 
 ### Safe
 
-Safe methods are HTTP **methods that do not modify resources**. Meaning if you use a safe HTTP method it MUST NOT create, update or delete resources. In addition, safe methods are methods that can be cached, prefetched without any repercussions to the resource.
+Per [HTTP Semantics and Content](https://tools.ietf.org/html/rfc7231#page-22) request methods are considered "safe" if their defined semantics are essentially read-only; i.e., the client does not request, and does not expect, any state change on the origin server as a result of applying a safe method to a target resource.  Likewise, reasonable use of a safe method is not expected to cause any harm, loss of property, or unusual burden on the origin server.
 
-**Example** 
+Safe methods are HTTP methods that do not modify resources. Meaning safe HTTP method MUST NOT create, update or delete resources. In addition, safe methods can be cached and prefetched without any repercussions to the resource.
 
-    GET https://dev.api.inetpsa.com/project/customers/delete HTTP/1.1
+**Example** - The following request is **incorrect** if this request actually deletes the resource : `GET` methods SHALL NOT produce any side effect
 
-> The following example is incorrect if this API call actually deletes the resource
-> Notice the `GET` method and the `/delete` in the URI
+    GET https://dev.api.inetpsa.com/project/customers/9812763/delete HTTP/1.1
 
 ### Summary Table
 
-|               |Idempotent     |Safe       |
-|---------------|-------------- |-----------|
-|`GET`			|**Yes**		|**Yes**		|
-|`POST`			|No			|No					|
-|`PUT`			|**Yes**			|No					|
-|`PATCH`			|No						|No			|
-|`DELETE`			|**Yes**			|No					|
+The table below should be read as follows :
+ * `GET`
+   *  MUST NOT create any side-effect (safe)
+   *  More than one identical requests MUST have the same behavior (idempotent)
+ * `POST`
+   *  MAY create side-effect (not safe)
+   *  MAY behave differently when performing identical requests (not idempotent)
+ * `PUT` 
+   *  MAY create side-effects (not safe)
+   *  More than one identical requests MUST have the same behavior (idempotent)
+ * `PATCH`
+   *  MAY create side-effect (not safe)
+   *  MAY behave differently when performing identical requests (not idempotent)
+ * `DELETE`
+   *  MAY create side-effects (not safe)
+   *  More than one identical requests MUST have the same behavior (idempotent)
+
+|           |Idempotent |Safe       |
+|-----------|-----------|-----------|
+|`GET`			|**Yes**	  |**Yes**	  |
+|`POST`			|No			    |No			    |
+|`PUT`			|**Yes**	  |No			    |
+|`PATCH`		|No			    |No			    |
+|`DELETE`		|**Yes**	  |No			    |
 
 ## Status codes 
 
+Per [RF7231](https://www.ietf.org/rfc/rfc2616.txt), the Status-Code element is a 3-digit integer result code of the attempt to understand and satisfy the request. 
+
 ### Status Code Ranges
 
-When responding to API requests, the following status code ranges MUST be used.
-
-|Range|Meaning|
-|---|---|
-|`2xx`|Returned when the request was successfully executed|
-|`4xx`|Returned when a client error occurs while formulating the request. Usually these are problems with the request, the data in the request, invalid authentication or authorization, etc.|
-| `5xx`| Returned when a server error occurs after a correctly formulated request was sent failed on the server. 5xx range status codes SHOULD NOT be utilized for validation or logical error handling. |
+The first digit of the Status-Code defines the class of response. The last two digits do not have any categorization role. There are 5 values for the first digit:
+      - `1xx`: Informational - Request received, continuing process
+      - `2xx`: Success - The action was successfully received,
+        understood, and accepted
+      - `3xx`: Redirection - Further action must be taken in order to
+        complete the request
+      - `4xx`: Client Error - The request contains bad syntax or cannot
+        be fulfilled
+      - `5xx`: Server Error - The server failed to fulfill an apparently
+        valid request
 
 ### Allowed Status Codes List
 
-All REST APIs MUST use only the following status codes. APIs MUST NOT return a status code that is not defined in this table.
+All APIs MUST only use the status codes listed below. APIs MUST NOT return a status code that is not defined in this table.
 
 | Status Code | Description |
 |-------------|-------------|
 | `200 OK` | Standard response for successful HTTP requests. The actual response will depend on the request method used. In a GET request, the response will contain an entity corresponding to the requested resource. In a POST request the response will contain an entity describing or containing the result of the action. |
 | `201 Created` | The request has been fulfilled and resulted in a new resource being created. Successful creation occurred (via either POST or PUT). Set the Location header to contain a link to the newly-created resource (on POST). Response body content may or may not be present. |
-| `202 Accepted` | Used for asynchronous method execution to specify the server has accepted the request and will execute it at a later time. For more details, please refer [Asynchronous Operations](tobecompleted). |
+| `202 Accepted` | Used for asynchronous method execution to specify the server has accepted the request and will execute it at a later time. For more details, please refer [Asynchronous Operations](#performance--asynchronism). |
 | `204 No Content` | 	The server successfully processed the request, but is not returning any content. The 204 response MUST NOT include a message-body, and thus is always terminated by the first empty line after the header fields. |
 | `300 Not Modified` | Used for conditional GET calls to reduce band-width usage. If used, must set the Date, Content-Location, ETag headers to what they would have been on a regular GET call. There must be no body on the response.|
 | `401 Unauthorized` | The request requires authentication and none was provided. Note the difference between this and `403 Forbidden`. |
@@ -164,23 +178,18 @@ For each HTTP method, API developers SHOULD use only status codes marked as "X" 
 | `PATCH`     | X             |               |               | X           | X            | X                        | X                       |
 | `DELETE`    | X             |               |               | X           | X             | X                            | X                       |
 
-
-
-* `GET`: The purpose of the `GET` method is to retrieve a resource. On success, a status code `200` and a response with the content of the resource is expected. In cases where resource collections are empty (0 items in `/customers`), `200` is the appropriate status (resource will contain an empty `items` array).
+* `GET`: The purpose of the `GET` method is to retrieve a resource. On success, a status code `200` and a response with the content of the resource is expected. In cases where resource collections are empty (0 items in `/customers`), `200` is the appropriate status (resource will contain an empty `items` array). `204` SHALL NOT be used even though there is no content.
 
 * `POST`: The primary purpose of `POST` is to create a resource. If the resource did not exist and was created as part of the execution, then a status code `201` SHOULD be returned.
     * It is expected that on a successful execution, a reference to the resource created (in the form of a link or resource identifier) is returned in the response body.
-    * Idempotency semantics: If this is a subsequent execution of the same invocation (including the [`Foo-Request-Id`](#http-custom-headers) header) and the resource was already created, then a status code of `200` SHOULD be returned. For more details on idempotency in APIs, refer to [idempotency](tobecompleted).
-	* If a sub-resource is utilized ('controller' or data resource), and the primary resource identifier is non-existent, `404` is an appropriate response.
-
+    * Idempotency semantics: If this is a subsequent execution of the same invocation and the resource was already created, then a status code of `200` SHOULD be returned. For more details on idempotency in APIs, refer to [idempotency](#idempotent).
 
 * `PUT`: This method SHOULD return status code `204` as there is no need to return any content in most cases as the request is to update a resource and it was successfully updated. The information from the request should not be echoed back. 
 
-* `PATCH`: This method should follow the same status/response semantics as `PUT`, `204` status and no response body.
+* `PATCH`: This method SHOULD follow the same status/response semantics as `PUT`, `204` status and no response body.
 	* `200` + response body should be avoided at all costs, as `PATCH` performs partial updates, meaning multiple calls per resource is normal. As such, responding with the entire resource can result in large bandwidth usage, especially for bandwidth-sensitive mobile clients.
 
 * `DELETE`: This method SHOULD return status code `204` as there is no need to return any content in most cases as the request is to delete a resource and it was successfully deleted.
-
     * As the `DELETE` method MUST be idempotent as well, it SHOULD still return `204`, even if the resource was already deleted. Usually the API consumer does not care if the resource was deleted as part of this operation, or before. This is also the reason why `204` instead of `404` should be returned.
 
 # Formatting
