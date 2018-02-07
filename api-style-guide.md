@@ -51,7 +51,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
      - [Selecting](#selecting)
      - [Sorting](#sorting)
    - [Pagination](#pagination)
-     - [Offset/Limit pagination](#offsetlimit-pagination)
+     - [Offsets pagination](#offsets-pagination)
      - [Cursor Based Pagination](#cursor-based-pagination)
      - [Pagination & Hypermedia](#pagination---hypermedia) 
  - [Caching](#caching) 
@@ -430,7 +430,7 @@ GET /cars/  HTTP/1.1
 
 **Sample schema for a list of car objects using HAL**
 
-*Using Offset/Limit pagination : if an API uses cursors, include hash instead*
+*Using offsets pagination (in the case of cursors, include cursor instead)*
 
 ```json 
 
@@ -605,9 +605,9 @@ Sorting allows consumers to fetch data in the order they need. The API will resp
 
 When the dataset is too large, well designed APIs divide the data set into smaller chunks, which helps in improving the performance and makes it easy for the consumer to handle the response. While there exist several pagination techniques, all APIs MUST use either of the two techniques presented below. 
 
-### Offset/Limit pagination
+### Offsets pagination
 
-This technique SHALL be used by default. API consumers simply need to specify :
+Using offsets to paginate data is one of the most widely used techniques for pagination. This technique SHALL be used by default. API consumers simply need to specify :
 * An `offset` (or `page`): the start position of the concerned list of data
 * A `limit` : the number of items to be retrieved. Note that a default limit MUST be set. 
 
@@ -642,9 +642,18 @@ Returns [4, 5, 6, 7, 8, 9, 10, 11]
 }
 ```
 
-**Drawbacks of offset/limit**
+**Advantages of offsets**
 
-For mostly static content where items don’t move between pages frequently, offset/limit is great. But it isn't always the case,  specifically because items are sometimes added and removed while the user is navigating to different pages. Here's what can happen when using offset/limit on dynamic data  :
+This type of pagination has several advantages:
+* It gives the user the ability to see the total number of pages and their progress through that total
+* It gives the user the ability to jump to a specific page within the set
+* It’s easy to implement as long as there is an explicit ordering of the results from a query
+
+**Drawbacks of offsets**
+
+*Bad for large data sets* - As the `offset` increases the farther you go within the dataset, the database still has to read up to `offset + count` rows from disk.
+
+*Bad for real-time data* - For mostly static content where items don’t move between pages frequently, offsets pagination is great. But it isn't always the case,  specifically because items are sometimes added and removed while the user is navigating to different pages. Here's what can happen when using offsets on dynamic data  :
 
  1. **Displaying the same item twice**. This can happen if a new item was added at the top of the list, causing the skip and limit approach to show the item at the boundary between pages twice.
 
@@ -653,11 +662,11 @@ For mostly static content where items don’t move between pages frequently, off
  
  2. **Skipping an item**. Similarly to the example above, if an item is removed from the list we'll skip an item. 
  
-Though offset/limit can be used in 90% of the cases, it also means that for certain kinds of APIs, using this technique doesn’t make sense because the set of data and the boundaries between loaded sections is constantly changing (i.e. real time data). **In this case, use cursor based pagination**.
+Though offsets can be used in 90% of the cases, it also means that for certain kinds of APIs, using this technique doesn’t make sense because the set of data and the boundaries between loaded sections is constantly changing (i.e. real time data). **In this case, use cursor based pagination**.
 
 ### Cursor-based pagination
 
-This pagination technique is is bit more complicated to implement. However, all APIs MUST use this pagination technique when dealing with real time data for the reasons explained above.
+This pagination technique is is bit more complicated to implement. However, all APIs MUST use this pagination technique when dealing with large data sets and real time data for the reasons explained above.
 
 In the example above, if we could have specified the exact position in the list we want to begin with, and the number of items we wanted to fetch, we would not have ran into these issues. With this technique, no matter how many items were removed or added to the top of the list , we still have a constant pointer to the exact position where we left off. This pointer is called a **cursor**. A cursor is a unique object identifier that sets the starting point of the pagination until the specified limit. 
 
@@ -683,12 +692,12 @@ In the example above, if we could have specified the exact position in the list 
 }
 ```
 
-**How to choose a cursor ?** Well, first off,  cursors MUST BE :
+Cursors MUST satisfy all the characteristic below :
  - **Unique** :  if not unique, conflicts may occur while setting the starting point of the pagination 
  - **Sortable** : to insure consistency and allow sorting 
  - **Stateless** : if not stateless, a cursor might not be available by the time it is used
 
-The ideal cursor is an **encoded timestamp** of the item, since it is satisfies all the above conditions. In the case where you do not have a timestamp on your items, you have to find the right parameter that satisfies all the above criterias : it could be a hash of an `ID`, `email` etc.
+The ideal cursor is an **encoded timestamp** of the item.   
 
 ### Pagination &  Hypermedia
 
