@@ -1,7 +1,7 @@
 
-# Groupe PSA API standards
+# Groupe PSA API Design Guidelines
 
-Standards and guidelines for Groupe PSA REST APIs.
+## Document Semantics, Formatting, and Naming
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC2119](https://www.ietf.org/rfc/rfc2119.txt).
 
@@ -10,7 +10,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
  - [HTTP Protocol](#http-protocol)
    - [Allowed HTTP Verbs List](#allowed-http-verbs-list) 
    - [Idempotent & Safe](#idempotent--safe)
-     - [Idempotent](#idempotent)
+     - [Idempotency](#idempotency)
      - [Safe](#safe)
      - [Summary Table](#summary-table)
    - [Status Codes](#status-codes)
@@ -78,7 +78,7 @@ HTTP defines a set of request methods to indicate the desired action to be perfo
 
 ## Idempotent & Safe 
 
-### Idempotent
+### Idempotency
 
 Idempotency is an important aspect of building a fault-tolerant API. Idempotent APIs enable clients to safely retry an operation without worrying about the side-effects that the operation can cause. For example, a client can safely retry an idempotent request in the event of a request failing due to a network connection error.
 
@@ -136,15 +136,11 @@ Per [RF7231](https://www.ietf.org/rfc/rfc2616.txt), the Status-Code element is a
 ### Status Code Ranges
 
 The first digit of the Status-Code defines the class of response. The last two digits do not have any categorization role. There are 5 values for the first digit:
-      - `1xx`: Informational - Request received, continuing process
-      - `2xx`: Success - The action was successfully received,
-        understood, and accepted
-      - `3xx`: Redirection - Further action must be taken in order to
-        complete the request
-      - `4xx`: Client Error - The request contains bad syntax or cannot
-        be fulfilled
-      - `5xx`: Server Error - The server failed to fulfill an apparently
-        valid request
+- `1xx`: Informational - Request received, continuing process
+- `2xx`: Success - The action was successfully received, understood, and accepted
+- `3xx`: Redirection - Further action must be taken in order to complete the request
+- `4xx`: Client Error - The request contains bad syntax or cannot be fulfilled
+- `5xx`: Server Error - The server failed to fulfill an apparently valid request
 
 ### Allowed Status Codes List
 
@@ -432,7 +428,7 @@ There are multiple ways of working around this, choose the one that makes sense 
 
 **What is better with this implementation ?**
 
-APIs are more **precise** and **consistent**. They are **easier to understand** both for humans and machines and thus are **maintainable**. 
+APIs are more **precise** and **consistent**. They are **easier to understand** both for humans and machines and thus **maintainable**. 
 
 ## URI Parameters 
 
@@ -462,11 +458,11 @@ APIs are more **precise** and **consistent**. They are **easier to understand** 
 
 ## Filtering, Selecting & Sorting 
 
->  **It is recommended to use a GET request for reading operations by specifying filters directly in the URL. As opposed to doing a POST giving a request body with the filters.**
+Reading operations MUST use a `GET` request for reading operations by specifying filters directly in the URL ; as opposed to doing a `POST` filtering using a request body containing the filters.
 
 ### Filtering
 
-Filtering allows consumers to only fetch data that matches their conditions. Filtering MUST be done using `GET` requests.
+Filtering allows consumers to only fetch data that matches their conditions.
 
  - **Single-Value / Single-Criteria Filtering** 
  `GET /customers?name=John` : get all customers whose names is `John`
@@ -479,7 +475,7 @@ Filtering allows consumers to only fetch data that matches their conditions. Fil
  
 ### Selecting 
 
-Selecting fields allows consumers to only fetch data they need within a resource. This mechanism is really useful when dealing with bad internet connection. To select fields simply specify them in the URI. Selecting MUST be done using `GET` requests.
+Selecting fields allows consumers to only fetch data they need within a resource. This mechanism is really useful when dealing with bad internet connection. To select fields simply specify them in the URI. 
 
 **Example** : `GET /customers?fields=id,address(city)` only fetch `id` and `address` with `city` only of customer `456` :
 
@@ -494,7 +490,7 @@ Selecting fields allows consumers to only fetch data they need within a resource
 
 ### Sorting
 
-Sorting allows consumers to fetch data in the order they need. The API will respond with the data in the order specified in the request. Sorting MUST be done using `GET` requests.
+Sorting allows consumers to fetch data in the order they need. The API will respond with the data in the order specified in the request. 
 
 **Examples** : 
 * `GET /customers?sort=name` fetch all customers and sort by `name` (by default sorting is ascending)
@@ -737,7 +733,3 @@ APIs that support both synchronous and asynchronous operations for a particular 
 * If the request doesn't contain a `Prefer=respond-async` header, the service MUST process the request synchronously.
 
 It is desirable that all APIs that implement asynchronous processing, also support [webhooks](https://en.wikipedia.org/wiki/Webhook) as a mechanism of pushing the processing status to the client.
-
-# License
-
-<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
