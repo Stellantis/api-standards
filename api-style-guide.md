@@ -767,28 +767,19 @@ See full detail on versioning on slide X*
 
 API’s are versioned products and MUST adhere to the following versioning principles.
 
-1. API specifications MUST follow the versioning scheme where where the `v` introduces the version, the major is an ordinal starting with `1` for the first LIVE release, and minor is an ordinal starting with `0` for the first minor release of any major release.
-3. API endpoints MUST only reflect the major version. (see below)
-5. A minor API version MUST maintain backward compatibility with all previous minor versions, within the same major version.
-6. A major API version MAY maintain backward compatibility with a previous major version.
+1. API specifications MUST follow the versioning scheme where where the `v` introduces the version, the major is an ordinal starting with `1` for the first LIVE release, and minor is an ordinal starting with `0` for the first minor release of any major release
+3. API endpoints MUST only reflect the major version
+5. A minor API version MUST maintain backward compatibility with all previous minor versions, within the same major version
+6. A major API version MAY maintain backward compatibility with a previous major version
 
 ## Version Invocation 
 
-There are two main ways to version an API (see next slide), either invoke the version in the :
- - **URL** : APIs MUST invoke the version in the url of the request : 
-    ```
-    https://api.mpsa.com/manufacturing/factory/customers/456
-    ```
+APIs MUST invoke the version in the url of the request.
+```
+https://api.mpsa.com/manufacturing/factory/v1/customers/456
+```
 
- 	 - Cleaner approach, less error prone
-	 - Consumers don’t need to handle HTTP headers (which can be tough for some clients)
-	 - More explorable : easier testing with a simple browser
-
- - **HTTP Header** : APIs MUST NOT invoke the version in the header as it is more prone to errors and not developer friendly 
-	  ``` 
-	  Accept: application/json;version=1
-    https://api.mpsa.com/customers/456
-    ```  
+APIs MUST NOT invoke the version number in the header of the request.
 
 # Performance & Asynchronism
 
