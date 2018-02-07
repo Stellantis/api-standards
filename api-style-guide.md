@@ -18,6 +18,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
      -  [Allowed Status Codes List](#allowed-status-codes-list)
      -  [HTTP Method to Status Code Mapping](#http-method-to-status-code-mapping)
  - [Formatting](#formatting)
+   - [JSON Object Key](#json-object-key)
    - [JSON Types](#json-types)
      -  [JSON Primitive Types](#json-primitive-types)
      -  [Common Types](#common-types)
