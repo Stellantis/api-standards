@@ -1,6 +1,12 @@
 
 # Groupe PSA API Design Guidelines
 
+## Introduction
+
+This repository provides guidelines and examples for APIs at PSA. These guidelines intend to encourage consistency, maintainability, and best practices across all APIs and applications.
+
+These guidelines were strongly inspired from [Paypal's API Standards](https://github.com/paypal/api-standards) and some other [references](references.md).
+
 ## Document Semantics, Formatting, and Naming
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC2119](https://www.ietf.org/rfc/rfc2119.txt).
