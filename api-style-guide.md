@@ -481,7 +481,10 @@ APIs at PSA MUST be be formatted with the following components :
 All API URIs MUST follow the rules listed below :
 1. MUST NOT contain actions or verbs
 2. MUST contain the plural form of resources
-3. HTTP methods SHALL define the kind of action to be performed on the resource
+3. MUST use the English language
+4. HTTP methods SHALL define the kind of action to be performed on the resource
+5. MUST be formatted using lower `snake-case` 
+6. MUST only contain [UTF-8](https://en.wikipedia.org/wiki/UTF-8#Codepage_layout) encoded characters
 
 Let’s consider a **Customer** resource on which we would like to perform several actions such as `list`, `update`, `delete` and `promote`. The API could be defined in a way that each endpoints corresponds to an operation as follows :
 * `GET `**`/getCustomers`** : **return** all customers 
@@ -499,20 +502,26 @@ Let’s consider a **Customer** resource on which we would like to perform sever
 
 If verbs cannot be used in URIs, how can endpoints tell the server about the actions to be performed on a given resource ? This is where the HTTP methods (or verbs as seen before) play the role. Let's consider the same example following REST rules :
 
- - **`GET`**`/customers` : **return** all customers 
- - **`GET`**`/customers/456` : **return** customer with id #456 
- - **`POST`**`/customers` : **create** customer according to the request **body**
- - **`DELETE`**`/customers/456` : **delete** customer with id #456
- - **`UPDATE`**`/customers/456` : **update** customer with id #456
- - **`GET`**`/companies/123/customers/456` : **return** customer with id #456 in company with id  #123 (if we have a resource under a resource)
+- **`GET`**`/customers` : **return** all customers 
+- **`GET`**`/customers/456` : **return** customer with id #456 
+- **`POST`**`/customers` : **create** customer according to the request **body**
+- **`DELETE`**`/customers/456` : **delete** customer with id #456
+- **`UPDATE`**`/customers/456` : **update** customer with id #456
+- **`GET`**`/companies/123/customers/456` : **return** customer with id #456 in company with id  #123 (if we have a resource under a resource)
 
-Great, but **how do we promote** (or perform any other specific actions using REST) ? This is where things get tricky in REST. Since we cannot use verbs in URIs and there is no HTTP method to promote a customer, then how do we do it ? 
+Great, but how do we promote (or perform any other specific service using REST)? This is where things get tricky in REST. Since we cannot use verbs in URIs and there is no HTTP method to promote a customer, then how do we do it ? 
 
-There are multiple ways of working around this, choose the one that makes sense to you and to your application. Ask yourself what the **promote** operation does : does it update a field in the user object ? Does it create a new record ? Does it update some kind of resource associated to the user ? Once you have defined the behavior, you can either :
+There are multiple ways of working around this, choose the one that makes sense to you and to your application. Ask yourself what the `promote` operation does : does it update a field in the user object ? Does it create a new record ? Does it update some kind of resource associated to the user ? Once you have defined the behavior, you can either :
 
- 1. RESTful way : `PATCH /customers/456` which will partially update the customer object to reflect the promotion (given that your models are built this way)
- 2. RESTful way : `PATCH /customers/456/grade` which will partially update a resource called **Grade** that is associated to the user 
- 3. Non-RESTful way though it is clean : `POST /customers/456/promote` this contains a verb and isn't considered RESTful though it is semantically clean and explicit. 
+1. RESTful way : `PATCH /customers/456` which will partially update the customer object to reflect the promotion (given that your models are built this way)
+2. RESTful way : `PATCH /customers/456/grade` which will partially update a resource called `grade` that is associated to the user 
+3. Non-RESTful way though it is clean : `POST /customers/456/promote` this contains a verb and isn't considered RESTful though it is semantically clean and explicit. 
+
+As a rule of thumb, anytime a service (as opposed to a ressource) has to be exposed, APIs MAY expose the result as a resource.
+
+**Example - Exposing a service to get the average number of trips per car**
+
+`GET /cars/average-trips` or `GET /cars/trips/average` (depending on how your resources are linked together) 
 
 **What is better with this implementation ?**
 
