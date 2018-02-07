@@ -190,6 +190,56 @@ For each HTTP method, API developers SHOULD use only status codes marked as "X" 
 
 # Formatting
 
+## General JSON Guidelines
+
+### JSON Object Key
+
+A JSON key or attribute MUST : 
+* Be unique for any given level of data
+* Use consistent case for keys : JSON keys MUST be formatted using `camelCase`
+* Respect the informational context by using clear and explicit naming : keys MUST use generic terms reusable in a different context than the application it was first designed for
+
+ - **Bad - Non-unique keys at the root of the object**
+   ```json
+    "customer" : {
+      "id": 19083974,
+      "name": "John",
+      "name": "Doe",  "Bad : using name twice on the same level of data is forbidden"
+  } 
+  ```
+
+ - **Good - Unique keys at any given level of data**
+   ```json
+    "customer" : {
+      "id": 19083974,
+      "name": "John Doe",
+      "address": {
+        "name": "Home", "Good:  this is allowed since it belongs to address and not customer"
+        "city": "Paris"
+      }
+  } 
+  ```
+
+ - **Bad - Non generic naming**
+   ```json
+    "customer" : {
+      "customeId": 19083974,  "Bad : since a customer could be a different object in a different context"
+      "home_address" : {  "Bad : not developer friendly as other projects might call it differently"
+        "city":"Paris"
+      }
+  } 
+  ```
+
+ - **Good - Generic naming**
+   ```json
+    "customer" : {
+      "id": 19083974,   "Good: generic naming, can be used in any context"
+      "address": {    "Good : generic naming"
+        "name": "Home", "Good : better naming strategy"
+      }
+  } 
+  ```
+
 ## JSON Types
 
 This section provides guidelines related to usage of [JSON primitive types](#json-primitive) as well as [commonly useful JSON types](#common-types) for address, name, currency, money, country, phone, among other things. APIs MUST follow common formatting rules to insure consistency across all projects.
@@ -201,9 +251,29 @@ As per [draft-04](https://tools.ietf.org/html/draft-zyp-json-schema-04#section-3
 * **boolean** : A JSON boolean.
 * **integer** : A JSON number without a fraction or exponent part.
 * **number** : Any JSON number.  Number includes integer.
-* **null** : The JSON null value.
+* **null** : The JSON null value : 
 * **object** : A JSON object.
 * **string** : A JSON string.
+
+#### Null
+
+APIs MUST NOT produce or consume null values.
+
+```json
+  "customer" : {
+    "id": 19083974,
+    "address": undefined
+} 
+```
+
+The property `address` is undefined and SHALL not be present in the object :
+
+```json
+  "customer" : {
+    "id": 19083974,
+} 
+```
+
 
 ### Common Types
 
@@ -259,6 +329,23 @@ An error response MUST NOT include any of the following information :
    "information_link":"http://developer.psa-peugeot-citroen.com/apidoc#VALIDATION_ERROR"
 }
 ```
+
+## Handling Multiple Formats
+
+In the case where APIs serve more than one content type, consumers MUST specify type they need using Accept header.
+
+APIs MAY take as input or output any content type needed (an audio file, a specific text format etc.).  Each API endpoint specifies what response type it outputs and what it consumes in cases where it applies (for POST requests for instance) :
+
+```
+GET /URL  HTTP/1.1   
+Accept : text/*
+```
+```
+HTTP/1.1 200 OK  
+Accept : text/html
+```
+
+See complete list of [MIME Types](https://developer.mozilla.org/fr/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Complete_list_of_MIME_types)
 
 ## Hypermedia
 
