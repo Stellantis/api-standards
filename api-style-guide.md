@@ -47,7 +47,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
    - [Pagination](#pagination)
      - [Offset/Limit pagination](#offsetlimit-pagination)
      - [Cursor Based Pagination](#cursor-based-pagination)
-     - [Pagination & Hypermedias](#pagination---hypermedias) 
+     - [Pagination & Hypermedia](#pagination---hypermedia) 
  - [Caching](#caching) 
    - [Caching Headers](#caching-headers)
    - [Caching Policies](#caching-policies)
@@ -85,7 +85,7 @@ Idempotency is an important aspect of building a fault-tolerant API. Idempotent 
 
 Per [HTTP Specification](https://tools.ietf.org/html/rfc2616#section-9.1.2), a method is idempotent if the side-effects of more than one identical requests are the same as those for a single request. Methods `GET`, `HEAD`, `PUT` and `DELETE` are defined idempotent.
 
-**Example** - The following statement is **idempotent** : no matter how many times we execute this statement, the customer’s age will always be set to 20.
+**Example** - The following statement is **idempotent** : no matter how many times this statement is executed, the customer’s age will always be set to 20.
 
     customer.age = 20 // idempotent
 
@@ -252,7 +252,7 @@ As per [draft-04](https://tools.ietf.org/html/draft-zyp-json-schema-04#section-3
 * **boolean** : A JSON boolean.
 * **integer** : A JSON number without a fraction or exponent part.
 * **number** : Any JSON number.  Number includes integer.
-* **null** : The JSON null value : 
+* **null** : The JSON null value
 * **object** : A JSON object.
 * **string** : A JSON string.
 
@@ -356,7 +356,7 @@ Hypermedia, an extension of the term [hypertext](https://en.wikipedia.org/wiki/H
 
 In the context of RESTful APIs, a client could interact with a service entirely through hypermedia provided dynamically by the service. A hypermedia-driven service provides representation of resource(s) to its clients to navigate the API dynamically by including hypermedia links in the responses. 
 
-**Hypermedias are not mandatory**, however if you have to use it then do it using [HAL](#hal).
+APIs MAY use hypermedia, thought it is not mandatory. APIs using hypermedia MUST however do it using [HAL](#hal).
 
 ### HAL
 
@@ -503,11 +503,11 @@ Let’s consider a **Customer** resource on which we would like to perform sever
 If verbs cannot be used in URIs, how can endpoints tell the server about the actions to be performed on a given resource ? This is where the HTTP methods (or verbs as seen before) play the role. Let's consider the same example following REST rules :
 
 - **`GET`**`/customers` : **return** all customers 
-- **`GET`**`/customers/456` : **return** customer with id #456 
-- **`POST`**`/customers` : **create** customer according to the request **body**
-- **`DELETE`**`/customers/456` : **delete** customer with id #456
-- **`UPDATE`**`/customers/456` : **update** customer with id #456
-- **`GET`**`/companies/123/customers/456` : **return** customer with id #456 in company with id  #123 (if we have a resource under a resource)
+- **`GET`**`/customers/456` : **return** customer with id `456` 
+- **`POST`**`/customers` : **create** customer according to the request `body`
+- **`DELETE`**`/customers/456` : **delete** customer with id `456`
+- **`UPDATE`**`/customers/456` : **update** customer with id `456`
+- **`GET`**`/companies/123/customers/456` : **return** customer with id #456 in company with id  `123` (if we have a resource under a resource)
 
 Great, but how do we promote (or perform any other specific service using REST)? This is where things get tricky in REST. Since we cannot use verbs in URIs and there is no HTTP method to promote a customer, then how do we do it ? 
 
@@ -645,7 +645,7 @@ For mostly static content where items don’t move between pages frequently, off
     **Example** : let's consider a list of 6 items **at time t**. The user performs a request to fetch the first page (`GET /items?limit=3`). Now let's say a new item was added at the top of the list and the user performs another request to fetch the second page (`GET /items?limit=3&offset=3`). It the state hadn't changed, he would have gotten the second page with items `[4, 5, 6]`, though he will get a response containing items `[3, 4, 5]`, item 3 being a duplicate.
  	<img src="https://raw.githubusercontent.com/GroupePSA/api-standards/master/examples/pagination/paginating-dynamic-data.png" width="600">
  
- 2. **Skipping an item**. Similarly to the example above, if we **remove** an item from the list we'll skip an item. 
+ 2. **Skipping an item**. Similarly to the example above, if an item is removed from the list we'll skip an item. 
  
 Though offset/limit can be used in 90% of the cases, it also means that for certain kinds of APIs, using this technique doesn’t make sense because the set of data and the boundaries between loaded sections is constantly changing (i.e. real time data). **In this case, use cursor based pagination**.
 
@@ -684,7 +684,7 @@ In the example above, if we could have specified the exact position in the list 
 
 The ideal cursor is an **encoded timestamp** of the item, since it is satisfies all the above conditions. In the case where you do not have a timestamp on your items, you have to find the right parameter that satisfies all the above criterias : it could be a hash of an `ID`, `email` etc.
 
-### Pagination &  Hypermedias
+### Pagination &  Hypermedia
 
 See [Paginating With HAL](#paginating-with-hal)
 
@@ -703,7 +703,7 @@ This table summarizes the most used caching techniques :
 | `Cache-Control : max-age` | Specifies the maximum time in seconds that the fetched response is allowed to be reused from the time of the request. For instance if `Cache-Control : maxe-age=60` header is set, any call made within 60 seconds will get a cached response.  |
 | `Last-Modified` | Contains the date and time at which the origin server believes the resource was last modified. It is used as a validator to determine if a resource received or stored is the same. Must be validated against `If-Modified-Since` & `If-Unmodified-Since` headers. |
 | `Expires` | Tells the client when the resource is going to expire. Usually has a date value that specifies from when the resource will be considered stale (possibly out-of-date), and so it needs to be re-validated. For instance if `Expires : Wed, 31 Dec 2018 07:28:00 GMT` header is set, any request made to the server before the specified date will return a cached response.  |
-| `Etag` | The ETag is a unique identifier for your response: it is used on conditional requests using `If-None-Match` header. Note: you have to make sure the server provides a validation token (ETag) service|
+| `Etag` | The ETag is a unique identifier for your response: it is used on conditional requests using `If-None-Match` header. *Note*: you have to make sure the server provides a validation token (ETag) service|
 
 ### Caching policies
 
@@ -711,7 +711,7 @@ API developers and designers MUST define and configure the appropriate per-resou
 
 #### Caching dynamic data
 
-You cannot cache for long periods of time, such as: days, hours or sometimes even minutes because data becomes stale too quickly. That doesn't mean, however, that such data shouldn't be cached at all. When caching resources for short periods of time you should be using HTTP caching instructions that do not rely on shared understanding of time, such as `Cache-Control : max-age`, `Expires` and `ETags`
+You cannot cache for long periods of time, such as days, hours or sometimes even minutes because data becomes stale too quickly. That doesn't mean, however, that such data shouldn't be cached at all. When caching resources for short periods of time you should be using HTTP caching instructions that do not rely on shared understanding of time, such as `Cache-Control : max-age`, `Expires` and `ETags`
 
 > Dynamic data is data that is often changing includes GPS location, battery voltage, tire pressure etc. 
 
@@ -740,9 +740,9 @@ There's no one best cache strategy. API designers and developers MUST take sever
    - Real-time applications (Waze for instance) : data has ~1sec or less lifetime
    - A car dealership application to know approximately where the car is located : data has a ~1min lifetime
 
-Developers SHALL refer to this diagram when deciding on which caching technique to choose :
+Developers MAY refer to this diagram when deciding on which caching technique to choose :
 
-<img src="https://raw.githubusercontent.com/GroupePSA/api-standards/master/examples/caching/caching-decision-tree.png" width="700">
+<img src="https://raw.githubusercontent.com/GroupePSA/api-standards/master/examples/caching/cache-decision-tree.png" width="700">
 
 # Version Management
 
