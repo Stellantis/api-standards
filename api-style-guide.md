@@ -200,8 +200,8 @@ A JSON key or attribute MUST :
 * Use consistent case for keys : JSON keys MUST be formatted using `camelCase`
 * Respect the informational context by using clear and explicit naming : keys MUST use generic terms reusable in a different context than the application it was first designed for
 
- - **Bad - Non-unique keys at the root of the object**
-   ```json
+- **Bad - Non-unique keys at the root of the object**
+  ```json
     "customer" : {
       "id": 19083974,
       "name": "John",
@@ -209,36 +209,36 @@ A JSON key or attribute MUST :
   } 
   ```
 
- - **Good - Unique keys at any given level of data**
-   ```json
+- **Good - Unique keys at any given level of data**
+  ```json
     "customer" : {
-      "id": 19083974,
-      "name": "John Doe",
-      "address": {
-        "name": "Home", "Good:  this is allowed since it belongs to address and not customer"
-        "city": "Paris"
-      }
-  } 
+        "id": 19083974,
+        "name": "John Doe",
+        "address": {
+          "name": "Home", "Good:  this is allowed since it belongs to address and not customer"
+          "city": "Paris"
+        }
+    } 
   ```
 
- - **Bad - Non generic naming**
-   ```json
+- **Bad - Non generic naming**
+  ```json
     "customer" : {
-      "customeId": 19083974,  "Bad : since a customer could be a different object in a different context"
-      "home_address" : {  "Bad : not developer friendly as other projects might call it differently"
-        "city":"Paris"
-      }
-  } 
+        "customeId": 19083974,  "Bad : since a customer could be a different object in a different context"
+        "home_address" : {  "Bad : not developer friendly as other projects might call it differently"
+          "city":"Paris"
+        }
+    } 
   ```
 
- - **Good - Generic naming**
-   ```json
+- **Good - Generic naming**
+  ```json
     "customer" : {
-      "id": 19083974,   "Good: generic naming, can be used in any context"
-      "address": {    "Good : generic naming"
-        "name": "Home", "Good : better naming strategy"
-      }
-  } 
+        "id": 19083974,   "Good: generic naming, can be used in any context"
+        "address": {    "Good : generic naming"
+          "name": "Home", "Good : better naming strategy"
+        }
+    } 
   ```
 
 ## JSON Types
