@@ -273,7 +273,7 @@ APIs MUST NOT produce or consume null values.
 } 
 ```
 
-The property `address` is undefined and SHALL not be present in the object :
+The property `address` is undefined and MUST NOT be present in the object :
 
 ```json
   "customer" : {
