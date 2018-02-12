@@ -852,7 +852,7 @@ There exists multiple ways to notify the API consumer that the operation has fin
 
 ### Polling
 
-<img src="https://raw.githubusercontent.com/GroupePSA/api-standards/master/examples/asynchronism/polling.png" width="300">
+<img src="https://raw.githubusercontent.com/GroupePSA/api-standards/master/examples/asynchronism/polling.png" width="350">
 
 In use cases where webhooks cannot be used, APIs MUST employ the following pattern :
 
@@ -894,7 +894,7 @@ The time it takes for an operation to finish may vary : polling forces consumers
 
 Webhooks solve this problem by allowing a web service to provide other services with near real-time information using HTTP POST requests. In short : instead of asking the server if it has data, the consumer will be notified to a given URI that the data is available.
 
-<img src="https://raw.githubusercontent.com/GroupePSA/api-standards/master/examples/asynchronism/webhooks.png" width="300">
+<img src="https://raw.githubusercontent.com/GroupePSA/api-standards/master/examples/asynchronism/webhooks.png" width="350">
 
 **What API conceptors need to provide :** 
 
