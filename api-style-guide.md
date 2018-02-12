@@ -29,15 +29,15 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
      -  [JSON Primitive Types](#json-primitive-types)
      -  [Common Types](#common-types)
 	   -  [Internationalization](#internationalization)
-	   -  [Date, Time and Timezone](#date-time-and-timezone)
 	   -  [Date Time Common Types](#date-time-common-types)
+	   -  [Geolocated data](#geolocated-data)
    - [Error Handling](#error-handling)
 	 - [Error Schema](#error-schema)
    - [Hypermedia](#hypermedia)
 	 - [HATEOAS](#hateoas)
 	 - [HAL](#hal)
 	 - [HAL Examples](#hal-examples)
-	 - [Paginating With HAL](#paginating-wit-hal)
+	 - [Paginating With HAL](#paginating-with-hal)
  - [API Endpoint](#api-endpoint)
    - [URI Structure](#uri-structure)
    - [URI Naming Rules](#uri-naming-rules)
@@ -65,7 +65,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
    - [Semantics](#semantics)
    - [Versioning Policies](#versioning-policies)
    - [Version Invocation](#version-invocation)
- - [Performance & Asynchronism](#perform---asynchronism)
+ - [Performance & Asynchronism](#performance--asynchronism)
    - [Operation Completion Notification](#operation-completion-notification)
    - [Asynchronism Patterns](#asynchronism-patterns)
 
@@ -140,7 +140,7 @@ The table below should be read as follows :
 
 Per [RF7231](https://www.ietf.org/rfc/rfc2616.txt), the Status-Code element is a 3-digit integer result code of the attempt to understand and satisfy the request. 
 
-### Status Code Ranges
+### Status Codes Ranges 
 
 The first digit of the Status-Code defines the class of response. The last two digits do not have any categorization role. There are 5 values for the first digit:
 - `1xx`: Informational - Request received, continuing process
@@ -305,6 +305,54 @@ The following common types MUST be used to express various date-time formats:
 | `date_time`        | `2018-02-06T19:31:29`  | RFC3339 `date-time`   |
 | `date_no_time`     | `2018-02-06`           | RFC3339 `full-date`   |
 | `time_nodate`      | `19:31:29`             | RFC3339 `full-time`   |
+
+#### Geolocated data
+
+All APIs exposing geolocated data MUST use the open standard format [GeoJSON](https://fr.wikipedia.org/wiki/GeoJSON). As per [RFC7946](https://tools.ietf.org/html/rfc7946), GeoJSON "defines several types of JSON objects and the manner in which they are combined to represent data about geographic features, their properties, and their spatial extents."
+
+Any of the following geometry type MUST be formatted using GeoJSON : 
+* **Points & Multipoints** : addresses and locations
+  ```
+  {
+    "type": "Feature",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [125.6, 10.1]
+    },
+    "properties": {
+      "name": "Home Adress"
+    }
+  }
+  ```
+* **LineStrings & MultiLineStrings** : streets, highways and boundaries
+  ```
+  { "type": "Feature",
+    "geometry": {
+       "type": "LineString",
+       "coordinates": [
+         [102.0, 0.0], [103.0, 1.0], [104.0, 0.0], [105.0, 1.0]
+       ]
+     },
+     "properties": {
+       "street": "7th Avenue"
+     }
+  },
+  ```
+* **Polygons & MultiPolygons** : countries, provinces, tracts of land
+  ```
+  { "type": "Feature",
+    "geometry": {
+       "type": "Polygon",
+       "coordinates": [
+           [ [100.0, 0.0], [101.0, 0.0], [101.0, 1.0],
+             [100.0, 1.0], [100.0, 0.0] ]
+        ]
+     },
+     "properties": {
+       "country": "France"
+     }
+  },
+  ```
 
 ## Error Handling
 
