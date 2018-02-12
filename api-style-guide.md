@@ -28,16 +28,16 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
    - [JSON Types](#json-types)
      -  [JSON Primitive Types](#json-primitive-types)
      -  [Common Types](#common-types)
-	   -  [Internationalization](#internationalization)
-	   -  [Date Time Common Types](#date-time-common-types)
-	   -  [Geolocated data](#geolocated-data)
+     -  [Internationalization](#internationalization)
+     -  [Date Time Common Types](#date-time-common-types)
+     -  [Geolocated data](#geolocated-data)
    - [Error Handling](#error-handling)
-	 - [Error Schema](#error-schema)
+   - [Error Schema](#error-schema)
    - [Hypermedia](#hypermedia)
-	 - [HATEOAS](#hateoas)
-	 - [HAL](#hal)
-	 - [HAL Examples](#hal-examples)
-	 - [Paginating With HAL](#paginating-with-hal)
+   - [HATEOAS](#hateoas)
+   - [HAL](#hal)
+   - [HAL Examples](#hal-examples)
+   - [Paginating With HAL](#paginating-with-hal)
  - [API Endpoint](#api-endpoint)
    - [URI Structure](#uri-structure)
    - [URI Naming Rules](#uri-naming-rules)
@@ -75,13 +75,13 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 HTTP defines a set of request methods to indicate the desired action to be performed for a given resource. The primary or most-commonly-used HTTP verbs (or methods, as they are properly called) are  `POST`, `GET`, `PUT`, `PATCH` and `DELETE`. There are a number of other verbs, too, but are utilized less frequently. All APIs MUST only use the verbs listed in the table below.
 
-|  Method 	| Action 																							|
+|  Method   | Action                                              |
 |-----------|---------------------------------------------------------------------------------------------------|
-|  `POST` 	| Method requests the server to **create** a resource in the database 								|
-|  `GET` 	| Method **requests data** from the resource and should not produce any side effect					|
-|  `PUT` 	| Method requests the server to **update** resource or **create** the resource, if it doesn’t exist |
-|  `PATCH` 	| Method requests the server to **partially update** resource 										|
-|  `DELETE` | Method requests that the resources, or its instance, **should be removed** from the database		|
+|  `POST`   | Method requests the server to **create** a resource in the database                 |
+|  `GET`  | Method **requests data** from the resource and should not produce any side effect         |
+|  `PUT`  | Method requests the server to **update** resource or **create** the resource, if it doesn’t exist |
+|  `PATCH`  | Method requests the server to **partially update** resource                     |
+|  `DELETE` | Method requests that the resources, or its instance, **should be removed** from the database    |
 
 ## Idempotent & Safe 
 
@@ -130,11 +130,11 @@ The table below should be read as follows :
 
 |           |Idempotent |Safe       |
 |-----------|-----------|-----------|
-|`GET`			|**Yes**	  |**Yes**	  |
-|`POST`			|No			    |No			    |
-|`PUT`			|**Yes**	  |No			    |
-|`PATCH`		|No			    |No			    |
-|`DELETE`		|**Yes**	  |No			    |
+|`GET`      |**Yes**    |**Yes**    |
+|`POST`     |No         |No         |
+|`PUT`      |**Yes**    |No         |
+|`PATCH`    |No         |No         |
+|`DELETE`   |**Yes**    |No         |
 
 ## Status codes 
 
@@ -158,10 +158,10 @@ All APIs MUST only use the status codes listed below. APIs MUST NOT return a sta
 | `200 OK` | Standard response for successful HTTP requests. The actual response will depend on the request method used. In a GET request, the response will contain an entity corresponding to the requested resource. In a POST request the response will contain an entity describing or containing the result of the action. |
 | `201 Created` | The request has been fulfilled and resulted in a new resource being created. Successful creation occurred (via either POST or PUT). Set the Location header to contain a link to the newly-created resource (on POST). Response body content may or may not be present. |
 | `202 Accepted` | Used for asynchronous method execution to specify the server has accepted the request and will execute it at a later time. For more details, please refer [Asynchronous Operations](#performance--asynchronism). |
-| `204 No Content` | 	The server successfully processed the request, but is not returning any content. The 204 response MUST NOT include a message-body, and thus is always terminated by the first empty line after the header fields. |
+| `204 No Content` |  The server successfully processed the request, but is not returning any content. The 204 response MUST NOT include a message-body, and thus is always terminated by the first empty line after the header fields. |
 | `300 Not Modified` | Used for conditional GET calls to reduce band-width usage. If used, must set the Date, Content-Location, ETag headers to what they would have been on a regular GET call. There must be no body on the response.|
 | `401 Unauthorized` | The request requires authentication and none was provided. Note the difference between this and `403 Forbidden`. |
-| `400 Bad Request` | 	The request could not be understood by the server due to malformed syntax. The client SHOULD NOT repeat the request without modifications.|
+| `400 Bad Request` |   The request could not be understood by the server due to malformed syntax. The client SHOULD NOT repeat the request without modifications.|
 | `401 Unauthorized` | Similar to 403 Forbidden, but specifically for use when authentication is possible but has failed or not yet been provided |
 | `403 Forbidden` | The server understood the request, but is refusing to fulfill it. It SHOULD describe the reason for the refusal in the entity. If the server does not wish to make this information available to the client, the status code 404 (Not Found) can be used instead |
 | `404 Not Found` | Used when the requested resource is not found, whether it doesn't exist or if there was a 401 or 403 that, for security reasons, the service wants to mask |
@@ -190,7 +190,7 @@ For each HTTP method, API developers SHOULD use only status codes marked as "X" 
 * `PUT`: This method SHOULD return status code `204` as there is no need to return any content in most cases as the request is to update a resource and it was successfully updated. The information from the request should not be echoed back. 
 
 * `PATCH`: This method SHOULD follow the same status/response semantics as `PUT`, `204` status and no response body.
-	* `200` + response body should be avoided at all costs, as `PATCH` performs partial updates, meaning multiple calls per resource is normal. As such, responding with the entire resource can result in large bandwidth usage, especially for bandwidth-sensitive mobile clients.
+  * `200` + response body should be avoided at all costs, as `PATCH` performs partial updates, meaning multiple calls per resource is normal. As such, responding with the entire resource can result in large bandwidth usage, especially for bandwidth-sensitive mobile clients.
 
 * `DELETE`: This method SHOULD return status code `204` as there is no need to return any content in most cases as the request is to delete a resource and it was successfully deleted.
     * As the `DELETE` method MUST be idempotent as well, it SHOULD still return `204`, even if the resource was already deleted. Usually the API consumer does not care if the resource was deleted as part of this operation, or before. This is also the reason why `204` instead of `404` should be returned.
@@ -520,11 +520,11 @@ APIs at PSA MUST be be formatted with the following components :
 
 **Example** : API called `factory` under the `manufacturing` domain. This specific endpoint addresses `v1` of the API and accesses the ressource `customers` (filtering by name `John`) 
 
-	    https://api.mpsa.com/manufacturing/factory/v1/customers?name=john
-	    \___/  \___________/ \___________/\______/\_/ \_______/ \_______/ 
-	      |          |             |         |     |      |         |
-	   protocol    domain   classification  api version resource  query 
-	            environement                name                parameters
+      https://api.mpsa.com/manufacturing/factory/v1/customers?name=john
+      \___/  \___________/ \___________/\______/\_/ \_______/ \_______/ 
+        |          |             |         |     |      |         |
+     protocol    domain   classification  api version resource  query 
+              environement                name                parameters
       
 
 
@@ -630,10 +630,10 @@ Selecting fields allows consumers to only fetch data they need within a resource
 
 ```json 
 {
-	"id": 19083974, 
-	"address":{ 
-		"city": "Paris",
-	}, 
+  "id": 19083974, 
+  "address":{ 
+    "city": "Paris",
+  }, 
 }
 ```
 
@@ -675,16 +675,16 @@ Returns [4, 5, 6, 7, 8, 9, 10, 11]
 
 ```json 
 {
-	"data": [
-		{"name": "John Doe", "..." },
-		{"name": "Mark Long", "..." },
-		{"name": "Helen Ping", "..."},
-		{"name": "Chris Temp", "..."},
-		{"name": "Simon Hillman", "..."}
-	],
-	"count": 5,
-	"offset" : 0,
-	"total" : 200 
+  "data": [
+    {"name": "John Doe", "..." },
+    {"name": "Mark Long", "..." },
+    {"name": "Helen Ping", "..."},
+    {"name": "Chris Temp", "..."},
+    {"name": "Simon Hillman", "..."}
+  ],
+  "count": 5,
+  "offset" : 0,
+  "total" : 200 
 }
 ```
 
@@ -704,7 +704,7 @@ This type of pagination has several advantages:
  1. **Displaying the same item twice**. This can happen if a new item was added at the top of the list, causing the skip and limit approach to show the item at the boundary between pages twice.
 
     **Example** : let's consider a list of 6 items **at time t**. The user performs a request to fetch the first page (`GET /items?limit=3`). Now let's say a new item was added at the top of the list and the user performs another request to fetch the second page (`GET /items?limit=3&offset=3`). It the state hadn't changed, he would have gotten the second page with items `[4, 5, 6]`, though he will get a response containing items `[3, 4, 5]`, item 3 being a duplicate.
- 	  
+    
     <img src="https://raw.githubusercontent.com/GroupePSA/api-standards/master/examples/pagination/paginating-dynamic-data.png" width="600">
  
  2. **Skipping an item**. Similarly to the example above, if an item is removed from the list we'll skip an item. 
@@ -725,17 +725,17 @@ In the example above, if we could have specified the exact position in the list 
 
 ```json 
 {
-	"data": [
-		{"name": "John Doe", "..."},
-		{"name": "Mark Long", "..."},
-		{"name": "Helen Ping", "..."},
-		{"name": "Chris Temp", "..."},
-		{"name": "Simon Hillman", "..."}
-	],
-	"before" : "NDMyNzQyODI3OTQw1j3",
-	"after" : "MTAxNTExOTQ1MjAwNzI", 
-	"count": 5,
-	"total" : 200,
+  "data": [
+    {"name": "John Doe", "..."},
+    {"name": "Mark Long", "..."},
+    {"name": "Helen Ping", "..."},
+    {"name": "Chris Temp", "..."},
+    {"name": "Simon Hillman", "..."}
+  ],
+  "before" : "NDMyNzQyODI3OTQw1j3",
+  "after" : "MTAxNTExOTQ1MjAwNzI", 
+  "count": 5,
+  "total" : 200,
 }
 ```
 
@@ -850,7 +850,11 @@ There exists multiple ways to notify the API consumer that the operation has fin
 
 ## Asynchronism Patterns
 
-In use cases where asynchronism is necessary, APIs MUST employ the following pattern :
+### Polling
+
+<img src="https://raw.githubusercontent.com/GroupePSA/api-standards/master/examples/asynchronism/polling.png" width="300">
+
+In use cases where webhooks cannot be used, APIs MUST employ the following pattern :
 
 **For `POST` requests :**
 
@@ -871,15 +875,59 @@ Like `POST`, you can support `PUT`/`PATCH`/`DELETE`/`GET` to be asynchronous. Th
 
 * Return the `202 Accepted` HTTP response code.
 * In the response body, include one or more URIs as hypermedia links, which could include:
-	* A temporary request queue URI where the status of the operation may be obtained via some temporary identifier. Clients SHOULD make an HTTP `GET` request to obtain the status of the operation which MAY include such information as completion state, ETA, and final URI once it is completed.
+  * A temporary request queue URI where the status of the operation may be obtained via some temporary identifier. Clients SHOULD make an HTTP `GET` request to obtain the status of the operation which MAY include such information as completion state, ETA, and final URI once it is completed.
        
     `{ "rel": "self", "href": "/v1/queue/requests/{request_id}, "method": "GET" }"`
 
 **APIs that support both synchronous and asynchronous processing for an URI:**
 
-APIs that support both synchronous and asynchronous operations for a particular URI and an HTTP method combination, MUST recognize the [`Prefer`](index.md#http-standard-headers) header and exhibit following behavior:
+APIs that support both synchronous and asynchronous operations for a particular URI and an HTTP method combination, MUST recognize the `Prefer` header and exhibit following behavior:
 
 * If the request contains a `Prefer=respond-async` header, the service MUST switch the processing to asynchronous mode. 
 * If the request doesn't contain a `Prefer=respond-async` header, the service MUST process the request synchronously.
 
 It is desirable that all APIs that implement asynchronous processing, also support [webhooks](https://en.wikipedia.org/wiki/Webhook) as a mechanism of pushing the processing status to the client.
+
+### Webhooks
+
+The time it takes for an operation to finish may vary : polling forces consumers to figure out how often to make the polling calls which is far from being optimal. 
+
+Webhooks solve this problem by allowing a web service to provide other services with near real-time information using HTTP POST requests. In short : instead of asking the server if it has data, the consumer will be notified to a given URI that the data is available.
+
+<img src="https://raw.githubusercontent.com/GroupePSA/api-standards/master/examples/asynchronism/webhooks.png" width="300">
+
+**What API conceptors need to provide :** 
+
+* Documentation the way consumers can specify the URI the webhook will serve
+* Provide information regarding the webhooks' payload : a webhook MUST at least provide the information in the table below : 
+
+  | Attribute   | Type    | Description |
+  |---------------|---------------|------------------------------------|
+  | `id`    | `string`    | Unique identifier for the webhook. |
+  | `created`   | `timestamp`   | Unique identifier for the webhook. | 
+  | `data`  | `url`       | URL to retrieve data associated with the event. |
+  | `type`  | `string`    | Description of the event (e.g: `car.registered` or `user.created`) |
+  
+**Sample webhook payload** 
+```
+  {
+    "id": "evt_1BqTZj2eZvKYlo2CvwY0ZQBr",
+    "created": 1517435823,
+    "data":  "https://api.mpsa.com/manufacturing/factory/v1/customers/123123",
+    "type": "user.created"
+  }
+```
+
+**What API consumers must implement :**
+
+Consumer MUST setup an API endpoint to receive webhook's payloads and returing appropriate status codes. In pseudo code : 
+```
+post "/my/webhook/url" do
+  # Retrieve the request's body and parse it as JSON
+  event_json = JSON.parse(request.body.read)
+
+  # Do something with event_json
+
+  status 200
+end
+```
