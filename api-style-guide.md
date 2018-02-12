@@ -358,8 +358,6 @@ Any of the following geometry type MUST be formatted using GeoJSON :
 
 The HTTP status codes in the `4xx` range indicate client-side errors (validation or logic errors), while those in the `5xx` range indicate server-side errors (usually defect or outage). However, these status codes and human readable reason phrase are not sufficient to convey enough information about an error in a machine-readable manner. To resolve an error, non-human consumers of RESTful APIs need additional help.
 
-Therefore, APIs MUST return a JSON error representation that conforms to the [`error.json`](tobecompleted) schema. 
-
 ### Error Schema 
 
 An error response MUST include the following fields:
@@ -374,7 +372,7 @@ An error response MUST NOT include any of the following information :
 * File path
 * Stack trace
 
-**Sample error response**
+Therefore, APIs MUST return a JSON error representation that conforms to the the following schema. 
 
 ```
 {  
