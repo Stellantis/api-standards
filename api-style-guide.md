@@ -49,10 +49,10 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
      - [Filtering](#filtering)
      - [Selecting](#selecting)
      - [Sorting](#sorting)
-   - [Pagination](#pagination)
-     - [Offsets pagination](#offsets-pagination)
-     - [Cursor Based Pagination](#cursor-based-pagination)
-     - [Pagination & Hypermedia](#pagination--hypermedia) 
+ - [Pagination](#pagination)
+   - [Offsets pagination](#offsets-pagination)
+   - [Cursor Based Pagination](#cursor-based-pagination)
+   - [Pagination & Hypermedia](#pagination--hypermedia) 
  - [Caching](#caching) 
    - [Caching Headers](#caching-headers)
    - [Caching Policies](#caching-policies)
@@ -609,12 +609,74 @@ Sorting allows consumers to fetch data in the order they need. The API will resp
 * `GET /customers?sort=name,age` fetch all customers and sort by `name` and `age`
 * `GET /customers?sort=age&desc=age` fetch all customers and sort by `age` in `desc` order 
 
-
-## Pagination
+# Pagination
 
 When the dataset is too large, well designed APIs divide the data set into smaller chunks, which helps in improving the performance and makes it easy for the consumer to handle the response. While there exist several pagination techniques, all APIs MUST use either of the two techniques presented below. 
 
-### Offsets pagination
+## Cursor-based pagination
+
+This pagination technique is a bit complicated to implement. However, all APIs MUST use this pagination technique when dealing with large data sets and real time data for the reasons explained above.
+
+**Cursors** let you specify the exact position in the list you want to begin with, as well as the number of items you want to fetch specified using the `limit` parameter (should be set by default). With this technique, no matter how many items were removed or added dynamically to the top of the list, we still have a constant pointer to the exact position where we left off. 
+
+Cursors cannot be used on resource without a monotonically increasing, unique property to sort on. Cursors MUST satisfy all the characteristic below :
+ - **Unique** :  if not unique, conflicts may occur while setting the starting point of the pagination 
+ - **Sortable** : to insure consistency and allow sorting 
+ - **Stateless** : if not stateless, a cursor might not be available by the time it is used
+
+The ideal cursor is an **encoded timestamp** of the item or its **incremental ID**.
+
+**Request - Get the first 5 (default limit) items**
+
+    GET /customers/  HTTP/1.1
+
+**Response**
+
+```json 
+{
+  "data": [0, 1, 2, 3, 4],
+  "before" : "NDMyNzQyODI3",
+  "after" : "MTAxNTExOTQ1", 
+  "count": 5,
+  "total" : 200,
+}
+```
+
+The following represents the state after the first request : 
+
+```
+[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+ ^---------->|  ^---------->|
+ before         after
+ NDMyNzQyODI3   MTAxNTExOTQ1             
+```
+
+**Request - Get the next 5 items**
+
+    GET /customers/cursor=MTAxNTExOTQ1&limit=5  HTTP/1.1
+
+**Response**
+
+```json 
+{
+  "data": [5, 6, 7, 8, 9],
+  "before" : "NDMyNzQyODI3",
+  "after" : "OPAxODJxKLF4", 
+  "count": 5,
+  "total" : 200,
+}
+```
+
+The following represents the state after the second request : 
+
+```
+[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+ ^---------->|  ^---------->|  ^--------------->|
+ before         cursor         after
+ NDMyNzQyODI3   MTAxNTExOTQ1   OPAxODJxKLF4          
+```
+
+## Offsets pagination
 
 Using offsets to paginate data is one of the most widely used techniques for pagination. This technique SHALL be used by default. API consumers simply need to specify :
 * An `offset` (or `page`): the start position of the concerned list of data
@@ -624,41 +686,29 @@ Using offsets to paginate data is one of the most widely used techniques for pag
 GET /customers?offset=5&limit=8 
 
 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
-               ^-------------------------^
-             offset                    limit
-                 
-Returns [4, 5, 6, 7, 8, 9, 10, 11]
+             ^----------------------^
+          offset                  limit
 ```
-
-**Request**
-
-    GET /customers/  HTTP/1.1
 
 **Response**
 
-```json 
+```javascript 
 {
-  "data": [
-    {"name": "John Doe", "..." },
-    {"name": "Mark Long", "..." },
-    {"name": "Helen Ping", "..."},
-    {"name": "Chris Temp", "..."},
-    {"name": "Simon Hillman", "..."}
-  ],
-  "count": 5,
-  "offset" : 0,
-  "total" : 200 
+  "data": [4, 5, 6, 7, 8, 9, 10, 11],
+  "count": 8,
+  "offset" : 5,
+  "total" : 15 
 }
 ```
 
-**Advantages of offsets**
+### Advantages of offsets
 
 This type of pagination has several advantages:
 * It gives the user the ability to see the total number of pages and their progress through that total
 * It gives the user the ability to jump to a specific page within the set
 * It’s easy to implement as long as there is an explicit ordering of the results from a query
 
-**Drawbacks of offsets**
+### Drawbacks of offsets
 
 *Bad for large data sets* - As the `offset` increases the farther you go within the dataset, the database still has to read up to `offset + count` rows from disk (ie. `> 10k rows`)
 
@@ -674,42 +724,7 @@ This type of pagination has several advantages:
  
 Though offsets can be used in 90% of the cases, it also means that for certain kinds of APIs, using this technique doesn’t make sense because the set of data and the boundaries between loaded sections is constantly changing (i.e. real time data). **In this case, use cursor based pagination**.
 
-### Cursor-based pagination
-
-This pagination technique is is bit more complicated to implement. However, all APIs MUST use this pagination technique when dealing with large data sets and real time data for the reasons explained above.
-
-In the example above, if we could have specified the exact position in the list we want to begin with, and the number of items we wanted to fetch, we would not have ran into these issues. With this technique, no matter how many items were removed or added to the top of the list , we still have a constant pointer to the exact position where we left off. This pointer is called a **cursor**. A cursor is a unique object identifier that sets the starting point of the pagination until the specified limit. 
-
-**Request**
-
-    GET /customers/  HTTP/1.1
-
-**Response**
-
-```json 
-{
-  "data": [
-    {"name": "John Doe", "..."},
-    {"name": "Mark Long", "..."},
-    {"name": "Helen Ping", "..."},
-    {"name": "Chris Temp", "..."},
-    {"name": "Simon Hillman", "..."}
-  ],
-  "before" : "NDMyNzQyODI3OTQw1j3",
-  "after" : "MTAxNTExOTQ1MjAwNzI", 
-  "count": 5,
-  "total" : 200,
-}
-```
-
-Cursors cannot be used on resource without a monotonically increasing, unique property to sort on. Cursors MUST satisfy all the characteristic below :
- - **Unique** :  if not unique, conflicts may occur while setting the starting point of the pagination 
- - **Sortable** : to insure consistency and allow sorting 
- - **Stateless** : if not stateless, a cursor might not be available by the time it is used
-
-The ideal cursor is an **encoded timestamp** of the item or its **incremental ID**.
-
-### Pagination & Hypermedia
+## Pagination & Hypermedia
 
 Pagination can be made easier for the consumer by returning preformatted URIs to fetch the **next** and **previous** pages. All APIs using hypermedia MUST perform pagination using HAL.
 
@@ -717,35 +732,54 @@ Pagination can be made easier for the consumer by returning preformatted URIs to
 GET /cars/  HTTP/1.1
 ```
 
-**Sample schema for a list of car objects using HAL**
+**Sample list of car objects using HAL**
 
-*Using offsets pagination (in the case of cursors, include cursor instead)*
+*Note : Using offsets pagination (in the case of cursor based pagination, include cursor instead)*
 
-```json 
-
+```javascript
 {
-  "_links": {
-    "self": {
-      "href": "/cars"
+    "_links": {
+        "self": {
+          "href": "/cars"
+        },
+        "first": {
+          "href": "/cars?offset=0"
+        },
+        "next": {
+          "href": "/cars?offset=10&limit=10"
+        },
+        "prev": {
+          "href": "/cars?offset=0"
+        },
+        "last": {
+          "href": "/cars?offset=90&limit=10"
+        }
     },
-    "first": {
-      "href": "/cars?offset=0"
-    },
-    "next": {
-      "href": "/cars?offset=10&limit=10"
-    },
-    "prev": {
-      "href": "/cars?offset=0"
-    },
-    "last": {
-      "href": "/cars?offset=90&limit=10"
+    "count": 3,
+    "total": 500,
+    "_embedded": {
+        "cars": [
+            {
+                "_links": {
+                    "self": {
+                        "href": "/cars/123"
+                    }
+                },
+                "id": 123,
+                "owner": "John Doe"
+            },
+            {
+                "_links": {
+                    "self": {
+                        "href": "/cars/283"
+                    }
+                },
+                "id": 283,
+                "owner": "Mark Nyse"
+            },
+        ]
     }
-  },
-  "total": 100,
-  "_embedded": {
-    "trips": []
-  }
-}     
+}    
 ```
  
 
