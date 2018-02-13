@@ -23,7 +23,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
      -  [Status Code Ranges](#status-codes-ranges) 
      -  [Status Codes List](#status-codes-list)
      -  [HTTP Method to Status Code Mapping](#http-method-to-status-code-mapping)
- - [Formatting](#formatting)
+ - [Payload](#payload)
    - [JSON Object Key](#json-object-key)
    - [JSON Types](#json-types)
      -  [JSON Primitive Types](#json-primitive-types)
@@ -31,13 +31,12 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
      -  [Internationalization](#internationalization)
      -  [Date Time Common Types](#date-time-common-types)
      -  [Geolocated data](#geolocated-data)
-   - [Error Handling](#error-handling)
+   - [Error Format](#error-format)
    - [Error Schema](#error-schema)
    - [Hypermedia](#hypermedia)
    - [HATEOAS](#hateoas)
    - [HAL](#hal)
    - [HAL Examples](#hal-examples)
-   - [Paginating With HAL](#paginating-with-hal)
  - [API Endpoint](#api-endpoint)
    - [URI Structure](#uri-structure)
    - [URI Naming Rules](#uri-naming-rules)
@@ -53,7 +52,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
    - [Pagination](#pagination)
      - [Offsets pagination](#offsets-pagination)
      - [Cursor Based Pagination](#cursor-based-pagination)
-     - [Pagination & Hypermedia](#pagination---hypermedia) 
+     - [Pagination & Hypermedia](#pagination--hypermedia) 
  - [Caching](#caching) 
    - [Caching Headers](#caching-headers)
    - [Caching Policies](#caching-policies)
@@ -196,7 +195,7 @@ For each HTTP method, API developers SHOULD use only status codes marked as "X" 
 * `DELETE`: This method SHOULD return status code `204` as there is no need to return any content in most cases as the request is to delete a resource and it was successfully deleted.
     * As the `DELETE` method MUST be idempotent as well, it SHOULD still return `204`, even if the resource was already deleted. Usually the API consumer does not care if the resource was deleted as part of this operation, or before. This is also the reason why `204` instead of `404` should be returned.
 
-# Formatting
+# Payload
 
 ## General JSON Guidelines
 
@@ -208,42 +207,42 @@ A JSON key or attribute MUST :
 * Respect the informational context by using clear and explicit naming : keys MUST use generic terms reusable in a different context than the application it was first designed for
 
 - **Bad - Non-unique keys at the root of the object**
-  ```json
+  ```javascript
     "customer" : {
       "id": 19083974,
       "name": "John",
-      "name": "Doe",  "Bad : using name twice on the same level of data is forbidden"
+      "name": "Doe",  // Bad : using name twice on the same level of data is forbidden
   } 
   ```
 
 - **Good - Unique keys at any given level of data**
-  ```json
+  ```javascript
     "customer" : {
         "id": 19083974,
         "name": "John Doe",
         "address": {
-          "name": "Home", "Good:  this is allowed since it belongs to address and not customer"
+          "name": "Home", // Good:  this is allowed since it belongs to address and not customer
           "city": "Paris"
         }
     } 
   ```
 
 - **Bad - Non generic naming**
-  ```json
+  ```javascript
     "customer" : {
-        "customeId": 19083974,  "Bad : since a customer could be a different object in a different context"
-        "home_address" : {  "Bad : not developer friendly as other projects might call it differently"
+        "customerId": 19083974, // Bad : since a customer could be a different object in a different context
+        "homeAddress" : {       // Bad : not developer friendly as other projects might call it differently
           "city":"Paris"
         }
     } 
   ```
 
 - **Good - Generic naming**
-  ```json
+  ```javascript
     "customer" : {
-        "id": 19083974,   "Good: generic naming, can be used in any context"
-        "address": {    "Good : generic naming"
-          "name": "Home", "Good : better naming strategy"
+        "id": 19083974,   // Good: generic naming, can be used in any context
+        "address": {      // Good : generic naming
+          "name": "Home", // Good : better naming strategy
         }
     } 
   ```
@@ -265,27 +264,29 @@ As per [draft-04](https://tools.ietf.org/html/draft-zyp-json-schema-04#section-3
 
 #### Null
 
-APIs MUST NOT produce or consume null values.
+APIs MUST NOT produce or consume null values. In JSON, a property that doesn't exist or is missing in the object is considered to be `undefined`; this is conceptually separate from a property that is defined with a value of `null`.
 
-```json
+For instance, a property `address` defined as `{"type": "null"}` is represented as : 
+
+```javascript
   "customer" : {
     "id": 19083974,
-    "address": undefined
-} 
+    "address": "null"
+  } 
 ```
 
-The property `address` is undefined and MUST NOT be present in the object :
+While a property `address` that is `undefined` MUST NOT be present in the object :
 
-```json
+```javascript
   "customer" : {
     "id": 19083974,
-} 
+  } 
 ```
 
 
 ### Common Types
 
-Resource representations in API MUST reuse the common data type definitions below where possible. Following sections provide some details about some of these common types. Please refer to the [schema](tobecompleted) for more details.
+Resource representations in API MUST reuse the common data type definitions below where possible. Following sections provide some details about some of these common types. 
 
 #### Internationalization
 
@@ -293,19 +294,19 @@ The following common types MUST be used with regard to global country, currency,
 
 | Type            | Example | Rule | 
 |-----------------|---------|------|
-| `country_code`  | `FR`    | All APIs MUST use the [ISO 3166-1 alpha-2](http://www.iso.org/iso/country_codes.htm) two letter country code standard |
-| `currency_code` | `EUR`   | All APIs MUST use the the three letter currency code as defined in [ISO 4217](http://www.currency-iso.org/). For quick reference on currency codes, see [http://en.wikipedia.org/wiki/ISO_4217](http://en.wikipedia.org/wiki/ISO_4217). |
-| `language.json` | `fr-FR` | All APIs MUST use the [BCP-47](https://tools.ietf.org/html/bcp47) language tag composed of : the `ISO-639 alpha-2 language code` (Optional), the `ISO-15924` script tag, the `ISO-3166 alpha-2` country code |
+| Country code | `FR`    | All APIs MUST use the [ISO 3166-1 alpha-2](http://www.iso.org/iso/country_codes.htm) two letter country code standard |
+| Currency code | `EUR`   | All APIs MUST use the the three letter currency code as defined in [ISO 4217](http://www.currency-iso.org/). For quick reference on currency codes, see [http://en.wikipedia.org/wiki/ISO_4217](http://en.wikipedia.org/wiki/ISO_4217). |
+| Language | `fr-FR` | All APIs MUST use the [BCP-47](https://tools.ietf.org/html/bcp47) language tag composed of : the `ISO-639 alpha-2 language code` (Optional), the `ISO-15924` script tag, the `ISO-3166 alpha-2` country code |
 
 #### Date Time Common Types
 
 The following common types MUST be used to express various date-time formats:
 
-| Type               | Example                | RFC                   | 
-|--------------------|------------------------|-----------------------|
-| `date_time`        | `2018-02-06T19:31:29`  | RFC3339 `date-time`   |
-| `date_no_time`     | `2018-02-06`           | RFC3339 `full-date`   |
-| `time_nodate`      | `19:31:29`             | RFC3339 `full-time`   |
+| Type              | Example                | RFC                   | 
+|-------------------|------------------------|-----------------------|
+| Date & Time       | `2018-02-06T19:31:29`  | RFC3339 `date-time`   |
+| Date              | `2018-02-06`           | RFC3339 `full-date`   |
+| Time              | `19:31:29`             | RFC3339 `full-time`   |
 
 #### Geolocated data
 
@@ -313,7 +314,7 @@ All APIs exposing geolocated data MUST use the open standard format [GeoJSON](ht
 
 Any of the following geometry type MUST be formatted using GeoJSON : 
 * **Points & Multipoints** : addresses and locations
-  ```
+  ```javascript
   {
     "type": "Feature",
     "geometry": {
@@ -326,7 +327,7 @@ Any of the following geometry type MUST be formatted using GeoJSON :
   }
   ```
 * **LineStrings & MultiLineStrings** : streets, highways and boundaries
-  ```
+  ```javascript
   { "type": "Feature",
     "geometry": {
        "type": "LineString",
@@ -340,7 +341,7 @@ Any of the following geometry type MUST be formatted using GeoJSON :
   },
   ```
 * **Polygons & MultiPolygons** : countries, provinces, tracts of land
-  ```
+  ```javascript
   { "type": "Feature",
     "geometry": {
        "type": "Polygon",
@@ -355,7 +356,7 @@ Any of the following geometry type MUST be formatted using GeoJSON :
   },
   ```
 
-## Error Handling
+## Error Format
 
 The HTTP status codes in the `4xx` range indicate client-side errors (validation or logic errors), while those in the `5xx` range indicate server-side errors (usually defect or outage). However, these status codes and human readable reason phrase are not sufficient to convey enough information about an error in a machine-readable manner. To resolve an error, non-human consumers of RESTful APIs need additional help.
 
@@ -364,9 +365,9 @@ The HTTP status codes in the `4xx` range indicate client-side errors (validation
 An error response MUST include the following fields:
 
 * `name`: A human-readable, unique name for the error. Should be mapped on the server side to insure consistency.
-* `debug_id`: A unique error identifier generated on the server-side and logged for correlation purposes.
+* `debug`: A unique error identifier generated on the server-side and logged for correlation purposes.
 * `message`: A human-readable message, describing the error. This message MUST be a description of the problem NOT a suggestion about how to fix it.
-* `information_link`: [HATEOAS](#hypermedia) links (in HAL format) specific to an error scenario. Use these links to provide more information about the error scenario and how to resolve it. 
+* `link`: [HATEOAS](#hypermedia) links (in HAL format) specific to an error scenario. Use these links to provide more information about the error scenario and how to resolve it. 
 
 An error response MUST NOT include any of the following information : 
 * Internal code
@@ -378,9 +379,9 @@ Therefore, APIs MUST return a JSON error representation that conforms to the the
 ```
 {  
    "name":"VALIDATION_ERROR",
-   "debug_id":"123456789",
+   "debug":"123456789",
    "message":"Invalid data provided",
-   "information_link":"http://developer.psa-peugeot-citroen.com/apidoc#VALIDATION_ERROR"
+   "link":"http://developer.psa-peugeot-citroen.com/apidoc#VALIDATION_ERROR"
 }
 ```
 
@@ -396,7 +397,7 @@ Accept : text/*
 ```
 ```
 HTTP/1.1 200 OK  
-Accept : text/html
+Content-Type : text/html
 ```
 
 See complete list of [MIME Types](https://developer.mozilla.org/fr/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Complete_list_of_MIME_types)
@@ -425,7 +426,7 @@ For simplicity reasons, all APIs using HATEOAS along with HAL formatting MUST on
 GET /cars/9837127  HTTP/1.1
 ```
 
-**Sample schema for a car object without using HAL**
+**Sample car object without using HAL**
 
 ```
 {
@@ -436,7 +437,7 @@ GET /cars/9837127  HTTP/1.1
 }
 ```
 
-**Sample schema for a car object using HAL**
+**Sample car object using HAL**
 
 ```
 {
@@ -467,45 +468,6 @@ For additional examples, please refer to this [list of public hypermedia APIs us
 
 Example of existing PSA APIs using HAL : [Connected Car 2.0.0](https://developer-preprod.psa-peugeot-citroen.com/inc/node/644)
 
-#### Paginating With HAL
-
-Pagination can be made easier for the consumer by returning preformatted URIs to fetch the **next** and **previous** pages. All APIs using hypermedia MUST perform pagination using HAL.
-
-```
-GET /cars/  HTTP/1.1
-```
-
-**Sample schema for a list of car objects using HAL**
-
-*Using offsets pagination (in the case of cursors, include cursor instead)*
-
-```json 
-
-{
-  "_links": {
-    "self": {
-      "href": "/cars"
-    },
-    "first": {
-      "href": "/cars?offset=0"
-    },
-    "next": {
-      "href": "/cars?offset=10&limit=10"
-    },
-    "prev": {
-      "href": "/cars?offset=0"
-    },
-    "last": {
-      "href": "/cars?offset=90&limit=10"
-    }
-  },
-  "total": 100,
-  "_embedded": {
-    "trips": []
-  }
-}     
-```
- 
 # API Endpoint
 
 ## URI Structure
@@ -747,9 +709,45 @@ Cursors cannot be used on resource without a monotonically increasing, unique pr
 
 The ideal cursor is an **encoded timestamp** of the item or its **incremental ID**.
 
-### Pagination &  Hypermedia
+### Pagination & Hypermedia
 
-See [Paginating With HAL](#paginating-with-hal)
+Pagination can be made easier for the consumer by returning preformatted URIs to fetch the **next** and **previous** pages. All APIs using hypermedia MUST perform pagination using HAL.
+
+```
+GET /cars/  HTTP/1.1
+```
+
+**Sample schema for a list of car objects using HAL**
+
+*Using offsets pagination (in the case of cursors, include cursor instead)*
+
+```json 
+
+{
+  "_links": {
+    "self": {
+      "href": "/cars"
+    },
+    "first": {
+      "href": "/cars?offset=0"
+    },
+    "next": {
+      "href": "/cars?offset=10&limit=10"
+    },
+    "prev": {
+      "href": "/cars?offset=0"
+    },
+    "last": {
+      "href": "/cars?offset=90&limit=10"
+    }
+  },
+  "total": 100,
+  "_embedded": {
+    "trips": []
+  }
+}     
+```
+ 
 
 ## Caching
 
