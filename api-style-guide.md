@@ -66,9 +66,12 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
    - [Semantics](#semantics)
    - [Versioning Policies](#versioning-policies)
    - [Version Invocation](#version-invocation)
- - [Performance & Asynchronism](#performance--asynchronism)
+ - [Asynchronism](#asynchronism)
    - [Operation Completion Notification](#operation-completion-notification)
    - [Asynchronism Patterns](#asynchronism-patterns)
+     - [Webhooks](#webhooks)
+     - [Polling](#polling)
+     - [External Notifications](#external-notifications)
 
 # HTTP Protocol
 
@@ -857,7 +860,7 @@ See full detail on versioning on slide X*
 
 ## Versioning Policies
 
-API’s are versioned products and MUST adhere to the following versioning principles.
+API’s are versioned products and MUST adhere to the following versioning principles, as per (SEMVER)[https://semver.org/].
 
 1. API specifications MUST follow the versioning scheme where where the `v` introduces the version, the major is an ordinal starting with `1` for the first LIVE release, and minor is an ordinal starting with `0` for the first minor release of any major release
 3. API endpoints MUST only reflect the major version
@@ -873,60 +876,22 @@ https://api.mpsa.com/manufacturing/factory/v1/customers/456
 
 APIs MUST NOT invoke the version number in the header of the request.
 
-# Performance & Asynchronism
+# Asynchronism
 
 Certain types of operations might require processing of the request in an asynchronous manner in order to avoid long delays on the client side and prevent long-standing open client connections waiting for the operations to complete. Usually, asynchronism should be considered when a delays exceed 400ms. If that is the case, API designers should ask themselves if such delay is problematic or not.  
 
 ## Operation Completion Notification
 
 There exists multiple ways to notify the API consumer that the operation has finished executing :
+* **Webhooks** : force the consumer to implement web hooks to retrieve the operation's response. While this solution is ideal and is RECOMMENDED for all APIs, consumer might not always support it.  
 * **Polling** : force the consumer to poll until the operation has finished executing
 * **External Notifications** : notify the operation completion via external notifications such as email, text message etc. Mostly used in cases where the consumer is a human.
-* **Webhooks** : force the consumer to implement web hooks to retrieve the operation's response. While this solution is ideal, consumer might not always support it.  
 
 ## Asynchronism Patterns
 
-### Polling
-
-<img src="https://raw.githubusercontent.com/GroupePSA/api-standards/master/examples/asynchronism/polling.png" width="350">
-
-In use cases where webhooks cannot be used, APIs MUST employ the following pattern :
-
-**For `POST` requests :**
-
-* Return the `202 Accepted` HTTP response code.
-* In the response body, include one or more URIs as hypermedia links, which could include:
-    * The final URI of the resource where it will be available in future if the ID and path are already known. Clients can then make an HTTP `GET` request to that URI in order to obtain the completed resource. Until the resource is ready, the final URI SHOULD return the HTTP status code `404 Not Found`. This is equivalent to polling.
-    
-    `{ "rel": "self", "href": "/v1/namespace/resources/{resource_id}", "method": "GET" }`
-    
-    * A temporary request queue URI where the status of the operation may be obtained via some temporary identifier. Clients SHOULD make an HTTP `GET` request to obtain the status of the operation which MAY include such information as completion state, ETA, and final URI once it is completed. This is equivalent to polling.
-    
-    `{ "rel": "self", "href": "/v1/queue/requests/{request_id}, "method": "GET" }"`
-    
-
-**For `PUT`/`PATCH`/`DELETE`/`GET` requests:**
-
-Like `POST`, you can support `PUT`/`PATCH`/`DELETE`/`GET` to be asynchronous. The behaviour would be as follows:
-
-* Return the `202 Accepted` HTTP response code.
-* In the response body, include one or more URIs as hypermedia links, which could include:
-  * A temporary request queue URI where the status of the operation may be obtained via some temporary identifier. Clients SHOULD make an HTTP `GET` request to obtain the status of the operation which MAY include such information as completion state, ETA, and final URI once it is completed.
-       
-    `{ "rel": "self", "href": "/v1/queue/requests/{request_id}, "method": "GET" }"`
-
-**APIs that support both synchronous and asynchronous processing for an URI:**
-
-APIs that support both synchronous and asynchronous operations for a particular URI and an HTTP method combination, MUST recognize the `Prefer` header and exhibit following behavior:
-
-* If the request contains a `Prefer=respond-async` header, the service MUST switch the processing to asynchronous mode. 
-* If the request doesn't contain a `Prefer=respond-async` header, the service MUST process the request synchronously.
-
-It is desirable that all APIs that implement asynchronous processing, also support [webhooks](https://en.wikipedia.org/wiki/Webhook) as a mechanism of pushing the processing status to the client.
-
 ### Webhooks
 
-The time it takes for an operation to finish may vary : polling forces consumers to figure out how often to make the polling calls which is far from being optimal. 
+The time it takes for an operation to finish may vary : [polling](#polling) forces consumers to figure out how often to make the polling calls which is far from being optimal. Instead, it is RECOMMENDED that APIs use webhooks whenever possible.
 
 Webhooks solve this problem by allowing a web service to provide other services with near real-time information using HTTP POST requests. In short : instead of asking the server if it has data, the consumer will be notified to a given URI that the data is available.
 
@@ -967,3 +932,46 @@ post "/my/webhook/url" do
   status 200
 end
 ```
+
+### Polling
+
+<img src="https://raw.githubusercontent.com/GroupePSA/api-standards/master/examples/asynchronism/polling.png" width="350">
+
+In use cases where webhooks cannot be used, APIs MUST employ the following pattern :
+
+**For `POST` requests :**
+
+* Return the `202 Accepted` HTTP response code.
+* In the response body, include one or more URIs as hypermedia links, which could include:
+    * The final URI of the resource where it will be available in future if the ID and path are already known. Clients can then make an HTTP `GET` request to that URI in order to obtain the completed resource. Until the resource is ready, the final URI SHOULD return the HTTP status code `404 Not Found`. This is equivalent to polling.
+    
+    `{ "rel": "self", "href": "/v1/namespace/resources/{resource_id}", "method": "GET" }`
+    
+    * A temporary request queue URI where the status of the operation may be obtained via some temporary identifier. Clients SHOULD make an HTTP `GET` request to obtain the status of the operation which MAY include such information as completion state, ETA, and final URI once it is completed. This is equivalent to polling.
+    
+    `{ "rel": "self", "href": "/v1/queue/requests/{request_id}, "method": "GET" }"`
+    
+
+**For `PUT`/`PATCH`/`DELETE`/`GET` requests:**
+
+Like `POST`, you can support `PUT`/`PATCH`/`DELETE`/`GET` to be asynchronous. The behaviour would be as follows:
+
+* Return the `202 Accepted` HTTP response code.
+* In the response body, include one or more URIs as hypermedia links, which could include:
+  * A temporary request queue URI where the status of the operation may be obtained via some temporary identifier. Clients SHOULD make an HTTP `GET` request to obtain the status of the operation which MAY include such information as completion state, ETA, and final URI once it is completed.
+       
+    `{ "rel": "self", "href": "/v1/queue/requests/{request_id}, "method": "GET" }"`
+
+**APIs that support both synchronous and asynchronous processing for an URI:**
+
+APIs that support both synchronous and asynchronous operations for a particular URI and an HTTP method combination, MUST recognize the `Prefer` header and exhibit following behavior:
+
+* If the request contains a `Prefer=respond-async` header, the service MUST switch the processing to asynchronous mode. 
+* If the request doesn't contain a `Prefer=respond-async` header, the service MUST process the request synchronously.
+
+It is desirable that all APIs that implement asynchronous processing, also support [webhooks](https://en.wikipedia.org/wiki/Webhook) as a mechanism of pushing the processing status to the client.
+
+
+### External Notifications
+
+API consumers can be notified via external notfications such as an email, sms etc. This technique is rarely used and can be applied only to very specific use cases. 
