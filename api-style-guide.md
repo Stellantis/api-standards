@@ -37,9 +37,11 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
    - [HATEOAS](#hateoas)
    - [HAL](#hal)
    - [HAL Examples](#hal-examples)
- - [API Endpoint](#api-endpoint)
+ - [API Endpoint](#uri)
    - [URI Structure](#uri-structure)
    - [URI Naming Rules](#uri-naming-rules)
+     - [Bad way of naming URIs](#bad-way-of-naming-uris)
+     - [Good way of naming URIs](#good-way-of-naming-uris)
    - [URI Parameters](#uri-parameters)
      - [Path Parameters](#path-parameters)
      - [Query Parameters](#query-parameters) 
@@ -468,28 +470,27 @@ For additional examples, please refer to this [list of public hypermedia APIs us
 
 Example of existing PSA APIs using HAL : [Connected Car 2.0.0](https://developer-preprod.psa-peugeot-citroen.com/inc/node/644)
 
-# API Endpoint
+# URI
 
 ## URI Structure
+
+**Example** : API called `factory` under the `manufacturing` domain. This specific endpoint addresses `v1` of the API and accesses the ressource `customers` (filtering by name `John`) 
+
+      https://api-prepod.mpsa.com/manufacturing/factory/v1/customers?name=john
+      \___/  \_________________/ \___________/\______/ \_/ \_______/ \_______/ 
+        |             |                |          |     |      |         |
+     protocol      domain        classification  api version resource  query 
+                environement                     name                parameters
+      
 
 APIs at PSA MUST be be formatted with the following components : 
  - **protocol** : must always be `https`
  - **environment** : could be `prod`, `preprod` or `dev`
  - **api** : specifies that this specific URI is an API endpoint
- - **domain** : must always point to `inetpsa.com`
- - **classification** : the domain it belongs to. *(May not always be needed in the case of enterprise APIs as opposed to application APIs)*
+ - **domain** : specific to PSA, can include a sub domain
+ - **classification** : may not always be needed in the case of enterprise APIs as opposed to application APIs
  - **api name** : the name of the API
  - **version** : must only contain the major version (`v1` instead of `v1.0`)
-
-**Example** : API called `factory` under the `manufacturing` domain. This specific endpoint addresses `v1` of the API and accesses the ressource `customers` (filtering by name `John`) 
-
-      https://api.mpsa.com/manufacturing/factory/v1/customers?name=john
-      \___/  \___________/ \___________/\______/\_/ \_______/ \_______/ 
-        |          |             |         |     |      |         |
-     protocol    domain   classification  api version resource  query 
-              environement                name                parameters
-      
-
 
 ## URI Naming Rules
 
@@ -500,6 +501,8 @@ All API URIs MUST follow the rules listed below :
 4. HTTP methods SHALL define the kind of action to be performed on the resource
 5. MUST be formatted using lower `snake-case` 
 6. MUST only contain [UTF-8](https://en.wikipedia.org/wiki/UTF-8#Codepage_layout) encoded characters
+
+### Bad way of naming URIs
 
 Let’s consider a **Customer** resource on which we would like to perform several actions such as `list`, `update`, `delete` and `promote`. The API could be defined in a way that each endpoints corresponds to an operation as follows :
 * `GET `**`/getCustomers`** : **return** all customers 
@@ -513,7 +516,7 @@ Let’s consider a **Customer** resource on which we would like to perform sever
 * The API endpoint MUST NOT contain actions or verbs. URIs must contain the plural form of resources and the HTTP method should define the kind of action to be performed on the resource.
 * There will be as many endpoints as there are operations to perform and many of these endpoints will contain redundant actions. This leads to unmaintainable APIs.
 
-**What is the correct way ?**
+### Good way of naming URIs
 
 If verbs cannot be used in URIs, how can endpoints tell the server about the actions to be performed on a given resource ? This is where the HTTP methods (or verbs as seen before) play the role. Let's consider the same example following REST rules :
 
@@ -710,17 +713,17 @@ This type of pagination has several advantages:
 
 ### Drawbacks of offsets
 
-*Bad for large data sets* - As the `offset` increases the farther you go within the dataset, the database still has to read up to `offset + count` rows from disk (ie. `> 10k rows`)
+* Bad for large data sets* - As the `offset` increases the farther you go within the dataset, the database still has to read up to `offset + count` rows from disk (ie. `> 10k rows`)
 
-*Bad for real-time data* - For mostly static content where items don’t move between pages frequently, offsets pagination is great. But it isn't always the case,  specifically because items are sometimes added and removed while the user is navigating to different pages. Here's what can happen when using offsets on dynamic data  :
+* Bad for real-time data* - For mostly static content where items don’t move between pages frequently, offsets pagination is great. But it isn't always the case,  specifically because items are sometimes added and removed while the user is navigating to different pages. Here's what can happen when using offsets on dynamic data  :
 
- 1. **Displaying the same item twice**. This can happen if a new item was added at the top of the list, causing the skip and limit approach to show the item at the boundary between pages twice.
+  1. **Displaying the same item twice**. This can happen if a new item was added at the top of the list, causing the skip and limit approach to show the item at the boundary between pages twice.
 
     **Example** : let's consider a list of 6 items **at time t**. The user performs a request to fetch the first page (`GET /items?limit=3`). Now let's say a new item was added at the top of the list and the user performs another request to fetch the second page (`GET /items?limit=3&offset=3`). It the state hadn't changed, he would have gotten the second page with items `[4, 5, 6]`, though he will get a response containing items `[3, 4, 5]`, item 3 being a duplicate.
     
     <img src="https://raw.githubusercontent.com/GroupePSA/api-standards/master/examples/pagination/paginating-dynamic-data.png" width="600">
  
- 2. **Skipping an item**. Similarly to the example above, if an item is removed from the list we'll skip an item. 
+  2. **Skipping an item**. Similarly to the example above, if an item is removed from the list we'll skip an item. 
  
 Though offsets can be used in 90% of the cases, it also means that for certain kinds of APIs, using this technique doesn’t make sense because the set of data and the boundaries between loaded sections is constantly changing (i.e. real time data). **In this case, use cursor based pagination**.
 
