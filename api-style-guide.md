@@ -21,7 +21,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
      - [Summary Table](#summary-table)
    - [Status Codes](#status-codes)
      -  [Status Code Ranges](#status-codes-ranges) 
-     -  [Allowed Status Codes List](#allowed-status-codes-list)
+     -  [Status Codes List](#status-codes-list)
      -  [HTTP Method to Status Code Mapping](#http-method-to-status-code-mapping)
  - [Formatting](#formatting)
    - [JSON Object Key](#json-object-key)
@@ -147,11 +147,11 @@ The first digit of the Status-Code defines the class of response. The last two d
 - `2xx`: Success - The action was successfully received, understood, and accepted
 - `3xx`: Redirection - Further action must be taken in order to complete the request
 - `4xx`: Client Error - The request contains bad syntax or cannot be fulfilled
-- `5xx`: Server Error - The server failed to fulfill an apparently valid request
+- `5xx`: Server Error - The server failed to fulfill an apparently valid request. (**note** : API developers MUST NOT explicitly return `5xx` codes as it is taken care by the server itself)
 
-### Allowed Status Codes List
+### Status Codes List
 
-All APIs MUST only use the status codes listed below. APIs MUST NOT return a status code that is not defined in this table.
+It is RECOMMENDED that APIs only return the most commonly used status codes listed in the table below. APIs MAY return a status code that is not defined in this table, in which case API designers must clearly state the reasons behind this choice. However, APIs MUST NOT return a status code that is not listed in the [HTTP/1.1 - RFC2616](https://www.ietf.org/rfc/rfc2616.txt).
 
 | Status Code | Description |
 |-------------|-------------|
@@ -166,6 +166,7 @@ All APIs MUST only use the status codes listed below. APIs MUST NOT return a sta
 | `403 Forbidden` | The server understood the request, but is refusing to fulfill it. It SHOULD describe the reason for the refusal in the entity. If the server does not wish to make this information available to the client, the status code 404 (Not Found) can be used instead |
 | `404 Not Found` | Used when the requested resource is not found, whether it doesn't exist or if there was a 401 or 403 that, for security reasons, the service wants to mask |
 | `406 Not Acceptable` | The server MUST return this status code when it cannot return the payload of the response using the media type requested by the client. For example, if the client sends an `Accept: application/xml` header, and the API can only generate `application/json`, the server MUST return `406`. |
+| `415 Unsupported Media Type` | The server MUST return this status code when the media type of the request's payload cannot be processed. For example, if the client sends a `Content-Type: application/xml` header, but the API can only accept `application/json`, the server MUST return `415`. |
 | `500 Internal Server Error` | This is either a system or application error, and generally indicates that although the client appeared to provide a correct request, something unexpected has gone wrong on the server. A `500` response indicates a server-side software defect or site outage. `500` SHOULD NOT be utilized for client validation or logic error handling. |
 | `503 Service Unavailable` | The server is unable to handle the request for a service due to temporary maintenance. |
 
