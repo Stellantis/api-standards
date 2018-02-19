@@ -13,6 +13,8 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 # Table Of Contents
 
+ - [Contract Description](#contract-description)
+   - [OpenAPI](#openapi)
  - [HTTP Protocol](#http-protocol)
    - [Allowed HTTP Verbs List](#allowed-http-verbs-list) 
    - [Idempotent & Safe](#idempotent--safe)
@@ -72,6 +74,45 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
      - [Webhooks](#webhooks)
      - [Polling](#polling)
      - [External Notifications](#external-notifications)
+
+# Contract Description
+
+## OpenAPI
+
+The [OpenAPI specification](https://swagger.io/specification/) (formerly known as the Swagger Specification) is a powerful definition format to describe RESTful APIs. All REST APIs PSA MUST be defined using this format. As it is both human and machine readable, Swagger is the essential link between any unit involved in an API's lifecycle, starting from business & technical specifications, to deployment.
+
+As shown in the [official documentation](https://swagger.io/docs/specification/2-0/basic-structure/), a sample Swagger specification written in YAML (as opposed to JSON) looks like this : 
+
+```
+swagger: "2.0"
+info:
+  title: Sample API
+  description: API description in YAML.
+  version: 1.0.0
+
+host: api.example.com
+basePath: /v1
+schemes:
+  - https
+
+paths:
+  /users:
+    get:
+      summary: Returns a list of users.
+      description: Optional extended description in Markdown.
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+```
+
+### Mandatory step towards deployment
+
+IBM API Connect, PSA's API manager, natively interfaces with Swagger, meaning a well designed Swagger heavily accelerates the API's publication process. Before submitting an REST API for deployment, conception/development teams MUST :
+* Provide a Swagger file describing the API 
+* Ensure the file reflects its implementation
+* Ensure the file file contains all of the information listed in the [Publication Guide](toprovide)  
 
 # HTTP Protocol
 
