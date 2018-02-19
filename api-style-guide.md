@@ -855,8 +855,8 @@ A version is written as follows :
  - **major version** : non-retro compatible updates
  - **minor version** : retro compatible updates
  - **patch version** : mostly bug fixing
-\**Retro compatibility : updates that are still compatible with previous versions of the API
-See full detail on versioning on slide X*
+   
+\**Retro compatibility : updates that are still compatible with previous versions of the API*
 
 ## Versioning Policies
 
