@@ -204,7 +204,7 @@ It is RECOMMENDED that APIs only return the most commonly used status codes list
 | `201 Created` | The request has been fulfilled and resulted in a new resource being created. Successful creation occurred (via either POST or PUT). Set the Location header to contain a link to the newly-created resource (on POST). Response body content may or may not be present. |
 | `202 Accepted` | Used for asynchronous method execution to specify the server has accepted the request and will execute it at a later time. For more details, please refer [Asynchronous Operations](#performance--asynchronism). |
 | `204 No Content` |  The server successfully processed the request, but is not returning any content. The 204 response MUST NOT include a message-body, and thus is always terminated by the first empty line after the header fields. |
-| `300 Not Modified` | Used for conditional GET calls to reduce band-width usage. If used, must set the Date, Content-Location, ETag headers to what they would have been on a regular GET call. There must be no body on the response.|
+| `304 Not Modified` | Used for conditional GET calls to reduce band-width usage. If used, must set the Date, Content-Location, ETag headers to what they would have been on a regular GET call. There must be no body on the response.|
 | `401 Unauthorized` | The request requires authentication and none was provided. Note the difference between this and `403 Forbidden`. |
 | `400 Bad Request` |   The request could not be understood by the server due to malformed syntax. The client SHOULD NOT repeat the request without modifications.|
 | `401 Unauthorized` | Similar to 403 Forbidden, but specifically for use when authentication is possible but has failed or not yet been provided |
