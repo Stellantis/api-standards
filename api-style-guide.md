@@ -219,13 +219,14 @@ It is RECOMMENDED that APIs only return the most commonly used status codes list
 
 For each HTTP method, API developers SHOULD use only status codes marked as "X"  in this table. 
 
-| Status Code | 200 Success | 201 Created |202 Accepted | 204 No Content | 400 Bad Request |  404 Not Found | 500 Internal Server Error |
-|-------------|:------------|:------------|:------------|:---------------|:----------------|:---------------|:--------------------------|
-| `GET`       | X         |               |               |                  | X             | X                      | X                       |
-| `POST`      | X         | X                 |                 |  X             | X             |               | X                       |
-| `PUT`       | X             |               | X           | X           | X             | X                       | X                       |
-| `PATCH`     | X             |               |               | X           | X            | X                        | X                       |
-| `DELETE`    | X             |               |               | X           | X             | X                            | X                       |
+| Status Code | 200 Success | 201 Created |202 Accepted | 204 No Content | 400 Bad Request | 401 Unauthorized | 403 Forbidden|  404 Not Found |500 Internal Server Error |
+|-------------|:------------|:------------|:------------|:---------------|:----------------|:----------------|:----------------|:---------------|:------------------------|
+| `GET`       | X           |             |             |                | X  | X | X            | X              | X |
+| `POST`      | X         | X                 |                 |  X   | X | X         | X             |               | X                       |
+| `PUT`       | X             |               | X           | X           | X | X| X            | X                       | X                       |
+| `PATCH`     | X             |               |               | X           | X   | X| X         | X                        | X                       |
+| `DELETE`    | X             |               |               | X           | X  | X| X           | X                            | X                       |
+
 
 * `GET`: The purpose of the `GET` method is to retrieve a resource. On success, a status code `200` and a response with the content of the resource is expected. In cases where resource collections are empty (0 items in `/customers`), `200` is the appropriate status (resource will contain an empty `items` array). `204` SHALL NOT be used even though there is no content.
 
