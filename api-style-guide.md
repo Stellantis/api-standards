@@ -48,7 +48,7 @@ paths:
 IBM API Connect, PSA's API manager, natively interfaces with Swagger, meaning a well designed Swagger heavily accelerates the API's publication process. Before submitting an REST API for deployment, conception/development teams MUST :
 * Provide a Swagger file describing the API 
 * Ensure the file reflects its implementation
-* Ensure the file file contains all of the information listed in the [Publication Guide](toprovide)  
+* Ensure the file file contains all of the information required for publication.
 
 # HTTP Protocol
 
@@ -448,8 +448,6 @@ GET /cars/9837127  HTTP/1.1
 
 For additional examples, please refer to this [list of public hypermedia APIs using HAL](https://github.com/mikekelly/hal_specification/wiki/APIs)
 
-Example of existing PSA APIs using HAL : [Connected Car 2.0.0](https://developer-preprod.psa-peugeot-citroen.com/inc/node/644)
-
 # URI
 
 ## URI Structure
@@ -837,7 +835,7 @@ A version is written as follows :
 
 ## Versioning Policies
 
-API’s are versioned products and MUST adhere to the following versioning principles, as per (SEMVER)[https://semver.org/].
+API’s are versioned products and MUST adhere to the following versioning principles, as per [semantic versionning](https://semver.org/).
 
 1. API specifications MUST follow the versioning scheme where where the `v` introduces the version, the major is an ordinal starting with `1` for the first LIVE release, and minor is an ordinal starting with `0` for the first minor release of any major release
 3. API endpoints MUST only reflect the major version
