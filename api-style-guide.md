@@ -533,9 +533,11 @@ APIs are more **precise** and **consistent**. They are **easier to understand** 
 
 ### Query Parameters
 
-`/customers?name=value` : appear at the end of the request URI after a question mark (?) separated by ampersands (&). Be careful when using sensitive/private query parameters as the URI is not encrypted over HTTPS : **pass in HEADER instead**.
+`/customers?name=value` : appear at the end of the request URI after a question mark (?) separated by ampersands (&). Avoid putting sensitive information (like a password) in query parameters. 
 
 **Example** : `GET /customers?name=John` used to target customers with name `John` 
+
+While these parameters are encrypted over TLS, they can be seen as plain-text in unsafe places like server access logs, bookmarks or referrer headers transmitted to other sites. **Pass sensitive information as HEADER instead**.
 
 ### Header Parameters 
 
