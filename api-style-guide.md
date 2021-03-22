@@ -147,6 +147,7 @@ It is RECOMMENDED that APIs only return the most commonly used status codes list
 | `404 Not Found` | Used when the requested resource is not found, whether it doesn't exist or if there was a 401 or 403 that, for security reasons, the service wants to mask |
 | `406 Not Acceptable` | The server MUST return this status code when it cannot return the payload of the response using the media type requested by the client. For example, if the client sends an `Accept: application/xml` header, and the API can only generate `application/json`, the server MUST return `406`. |
 | `415 Unsupported Media Type` | The server MUST return this status code when the media type of the request's payload cannot be processed. For example, if the client sends a `Content-Type: application/xml` header, but the API can only accept `application/json`, the server MUST return `415`. |
+| `429 Too Many Requests` | The server return this status code when the user has sent too many requests in a given amount of time. Intended for use with rate-limiting schemes.|
 | `500 Internal Server Error` | This is either a system or application error, and generally indicates that although the client appeared to provide a correct request, something unexpected has gone wrong on the server. A `500` response indicates a server-side software defect or site outage. `500` SHOULD NOT be utilized for client validation or logic error handling. |
 | `503 Service Unavailable` | The server is unable to handle the request for a service due to temporary maintenance. |
 
