@@ -19,7 +19,7 @@ The [OpenAPI specification](https://swagger.io/specification/) (formerly known a
 
 As shown in the [official documentation](https://swagger.io/docs/specification/2-0/basic-structure/), a sample Swagger specification written in YAML (as opposed to JSON) looks like this : 
 
-```
+```yaml
 swagger: "2.0"
 info:
   title: Sample API
@@ -74,11 +74,15 @@ Per [HTTP Specification](https://tools.ietf.org/html/rfc2616#section-9.1.2), a m
 
 **Example** - The following statement is **idempotent** : no matter how many times this statement is executed, the customer’s age will always be set to 20.
 
-    customer.age = 20 // idempotent
+```properties
+customer.age = 20 // idempotent
+```
 
 **Example** -  The following statement is **not idempotent** : executing this 10 times will result in different outcomes.
 
-    customer.age += 1 // non-idempotent
+```properties
+customer.age += 1 // non-idempotent
+```
 
 ### Safe
 
@@ -88,7 +92,9 @@ Safe methods are HTTP methods that do not modify resources. Meaning safe HTTP me
 
 **Example** - The following request is **incorrect** if this request actually deletes the resource : `GET` methods SHALL NOT produce any side effect
 
-    GET https://dev.api.inetpsa.com/project/customers/9812763/delete HTTP/1.1
+```log
+GET https://dev.api.inetpsa.com/project/customers/9812763/delete HTTP/1.1
+```
 
 ### Summary Table
 
@@ -190,45 +196,49 @@ A JSON key or attribute MUST :
 * Respect the informational context by using clear and explicit naming : keys MUST use generic terms reusable in a different context than the application it was first designed for
 
 - **Bad - Non-unique keys at the root of the object**
-  ```javascript
-    "customer" : {
-      "id": 19083974,
-      "name": "John",
-      "name": "Doe",  // Bad : using name twice on the same level of data is forbidden
-  } 
-  ```
+
+```json
+"customer" : {
+  "id": 19083974,
+  "name": "John",
+  "name": "Doe",  // Bad : using name twice on the same level of data is forbidden
+} 
+```
 
 - **Good - Unique keys at any given level of data**
-  ```javascript
-    "customer" : {
-        "id": 19083974,
-        "name": "John Doe",
-        "address": {
-          "name": "Home", // Good:  this is allowed since it belongs to address and not customer
-          "city": "Paris"
-        }
-    } 
-  ```
+
+```json
+"customer" : {
+  "id": 19083974,
+  "name": "John Doe",
+  "address": {
+    "name": "Home", // Good:  this is allowed since it belongs to address and not customer
+    "city": "Paris"
+  }
+} 
+```
 
 - **Bad - Non generic naming**
-  ```javascript
-    "customer" : {
-        "customerId": 19083974, // Bad : since a customer could be a different object in a different context
-        "homeAddress" : {       // Bad : not developer friendly as other projects might call it differently
-          "city":"Paris"
-        }
-    } 
-  ```
+
+```json
+"customer" : {
+  "customerId": 19083974, // Bad : since a customer could be a different object in a different context
+  "homeAddress" : {       // Bad : not developer friendly as other projects might call it differently
+    "city":"Paris"
+  }
+} 
+```
 
 - **Good - Generic naming**
-  ```javascript
-    "customer" : {
-        "id": 19083974,   // Good: generic naming, can be used in any context
-        "address": {      // Good : generic naming
-          "name": "Home", // Good : better naming strategy
-        }
-    } 
-  ```
+
+```json
+"customer" : {
+  "id": 19083974,   // Good: generic naming, can be used in any context
+  "address": {      // Good : generic naming
+    "name": "Home", // Good : better naming strategy
+  }
+} 
+```
 
 ## JSON Types
 
@@ -251,19 +261,19 @@ APIs MUST NOT produce or consume null values. In JSON, a property that doesn't e
 
 For instance, a property `address` defined as `{"type": "null"}` is represented as : 
 
-```javascript
-  "customer" : {
-    "id": 19083974,
-    "address": "null"
-  } 
+```json
+"customer" : {
+  "id": 19083974,
+  "address": "null"
+} 
 ```
 
 While a property `address` that is `undefined` MUST NOT be present in the object :
 
-```javascript
-  "customer" : {
-    "id": 19083974,
-  } 
+```json
+"customer" : {
+  "id": 19083974,
+} 
 ```
 
 
@@ -297,47 +307,53 @@ All APIs exposing geolocated data MUST use the open standard format [GeoJSON](ht
 
 Any of the following geometry type MUST be formatted using GeoJSON : 
 * **Points & Multipoints** : addresses and locations
-  ```javascript
-  {
-    "type": "Feature",
-    "geometry": {
-      "type": "Point",
-      "coordinates": [125.6, 10.1]
-    },
-    "properties": {
-      "name": "Home Adress"
-    }
+
+```json
+{
+  "type": "Feature",
+  "geometry": {
+    "type": "Point",
+    "coordinates": [125.6, 10.1]
+  },
+  "properties": {
+    "name": "Home Adress"
   }
-  ```
+}
+```
+
 * **LineStrings & MultiLineStrings** : streets, highways and boundaries
-  ```javascript
-  { "type": "Feature",
-    "geometry": {
-       "type": "LineString",
-       "coordinates": [
-         [102.0, 0.0], [103.0, 1.0], [104.0, 0.0], [105.0, 1.0]
-       ]
-     },
-     "properties": {
-       "street": "7th Avenue"
-     }
-  },
-  ```
+
+```json
+{
+  "type": "Feature",
+  "geometry": {
+     "type": "LineString",
+     "coordinates": [
+       [102.0, 0.0], [103.0, 1.0], [104.0, 0.0], [105.0, 1.0]
+     ]
+   },
+   "properties": {
+     "street": "7th Avenue"
+   }
+},
+```
+
 * **Polygons & MultiPolygons** : countries, provinces, tracts of land
-  ```javascript
-  { "type": "Feature",
-    "geometry": {
-       "type": "Polygon",
-       "coordinates": [
-           [ [100.0, 0.0], [101.0, 0.0], [101.0, 1.0],
-             [100.0, 1.0], [100.0, 0.0] ]
-        ]
-     },
-     "properties": {
-       "country": "France"
-     }
-  },
-  ```
+
+```json
+{ "type": "Feature",
+  "geometry": {
+     "type": "Polygon",
+     "coordinates": [
+         [ [100.0, 0.0], [101.0, 0.0], [101.0, 1.0],
+           [100.0, 1.0], [100.0, 0.0] ]
+      ]
+   },
+   "properties": {
+     "country": "France"
+   }
+},
+```
 
 ## Error Format
 
@@ -359,12 +375,12 @@ An error response MUST NOT include any of the following information :
 
 Therefore, APIs MUST return a JSON error representation that conforms to the the following schema. 
 
-```
+```json
 {  
-   "name":"VALIDATION_ERROR",
-   "debug":"123456789",
-   "message":"Invalid data provided",
-   "link":"http://developer.psa-peugeot-citroen.com/apidoc#VALIDATION_ERROR"
+  "name":"VALIDATION_ERROR",
+  "debug":"123456789",
+  "message":"Invalid data provided",
+  "link":"http://developer.psa-peugeot-citroen.com/apidoc#VALIDATION_ERROR"
 }
 ```
 
@@ -374,11 +390,12 @@ In the case where APIs serve more than one content type, consumers MUST specify 
 
 APIs MAY take as input or output any content type needed (an audio file, a specific text format etc.).  Each API endpoint specifies what response type it outputs and what it consumes in cases where it applies (for POST requests for instance) :
 
-```
+```log
 GET /URL  HTTP/1.1   
 Accept : text/*
 ```
-```
+
+```log
 HTTP/1.1 200 OK  
 Content-Type : text/html
 ```
@@ -405,13 +422,13 @@ For simplicity reasons, all APIs using HATEOAS along with HAL formatting MUST on
 
 #### HAL Examples
 
-```
+```log
 GET /cars/9837127  HTTP/1.1
 ```
 
 **Sample car object without using HAL**
 
-```
+```json
 {
   "id" : 9837127,
   "model" : "DS3",
@@ -422,7 +439,7 @@ GET /cars/9837127  HTTP/1.1
 
 **Sample car object using HAL**
 
-```
+```json
 {
   "_links": {
     "self": {
@@ -455,12 +472,13 @@ For additional examples, please refer to this [list of public hypermedia APIs us
 
 **Example** : API called `factory` under the `manufacturing` domain. This specific endpoint addresses `v1` of the API and accesses the ressource `customers` (filtering by name `John`) 
 
-      https://api-prepod.mpsa.com/manufacturing/factory/v1/customers?name=john
-      \___/  \_________________/ \___________/\______/ \_/ \_______/ \_______/ 
-        |             |                |          |     |      |         |
-     protocol      domain        classification  api version resource  query 
-                environement                     name                parameters
-      
+```log
+ https://api-prepod.mpsa.com/manufacturing/factory/v1/customers?name=john
+ \___/  \_________________/ \___________/\______/ \_/ \_______/ \_______/ 
+   |             |                |          |     |      |         |
+protocol      domain        classification  api version resource  query 
+           environement                     name                parameters
+```
 
 APIs at PSA MUST be be formatted with the following components : 
  - **protocol** : must always be `https`
@@ -612,7 +630,9 @@ The ideal cursor is an **encoded timestamp** of the item or its **incremental ID
 
 **Request - Get the first 5 (default limit) items**
 
-    GET /customers/  HTTP/1.1
+```log
+GET /customers/  HTTP/1.1
+```
 
 **Response**
 
@@ -628,7 +648,7 @@ The ideal cursor is an **encoded timestamp** of the item or its **incremental ID
 
 The following represents the state after the first request : 
 
-```
+```log
 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
  ^---------->|  ^---------->|
  before         after
@@ -653,7 +673,7 @@ The following represents the state after the first request :
 
 The following represents the state after the second request : 
 
-```
+```log
 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
  ^---------->|  ^---------->|  ^--------------->|
  before         cursor         after
@@ -666,7 +686,7 @@ Using offsets to paginate data is one of the most widely used techniques for pag
 * An `offset` (or `page`): the start position of the concerned list of data
 * A `limit` : the number of items to be retrieved. Note that a default limit MUST be set. 
 
-```
+```log
 GET /customers?offset=5&limit=8 
 
 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
@@ -676,7 +696,7 @@ GET /customers?offset=5&limit=8
 
 **Response**
 
-```javascript 
+```json 
 {
   "data": [4, 5, 6, 7, 8, 9, 10, 11],
   "count": 8,
@@ -712,7 +732,7 @@ Though offsets can be used in 90% of the cases, it also means that for certain k
 
 Pagination can be made easier for the consumer by returning preformatted URIs to fetch the **next** and **previous** pages. All APIs using hypermedia MUST perform pagination using HAL.
 
-```
+```log
 GET /cars/  HTTP/1.1
 ```
 
@@ -720,7 +740,7 @@ GET /cars/  HTTP/1.1
 
 *Note : Using offsets pagination (in the case of cursor based pagination, include cursor instead)*
 
-```javascript
+```json
 {
     "_links": {
         "self": {
@@ -848,7 +868,8 @@ API’s are versioned products and MUST adhere to the following versioning princ
 ## Version Invocation 
 
 APIs MUST invoke the version in the url of the request.
-```
+
+```log
 https://api.mpsa.com/manufacturing/factory/v1/customers/456
 ```
 
@@ -888,19 +909,21 @@ Webhooks solve this problem by allowing a web service to provide other services 
   | `type`  | `string`    | Description of the event (e.g: `car.registered` or `user.created`) |
   
 **Sample webhook payload** 
-```
-  {
-    "id": "evt_1BqTZj2eZvKYlo2CvwY0ZQBr",
-    "created": 1517435823,
-    "data":  "https://api.mpsa.com/manufacturing/factory/v1/customers/123123",
-    "type": "user.created"
-  }
+
+```json
+{
+  "id": "evt_1BqTZj2eZvKYlo2CvwY0ZQBr",
+  "created": 1517435823,
+  "data":  "https://api.mpsa.com/manufacturing/factory/v1/customers/123123",
+  "type": "user.created"
+}
 ```
 
 **What API consumers must implement :**
 
 Consumer MUST setup an API endpoint to receive webhook's payloads and returing appropriate status codes. In pseudo code : 
-```
+
+```log
 post "/my/webhook/url" do
   # Retrieve the request's body and parse it as JSON
   event_json = JSON.parse(request.body.read)
