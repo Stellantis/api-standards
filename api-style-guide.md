@@ -5,7 +5,7 @@
 
 This repository provides guidelines and examples for APIs at PSA. These guidelines intend to encourage consistency, maintainability, and best practices across all APIs and applications.
 
-These guidelines were strongly inspired from [Paypal's API Standards](https://github.com/paypal/api-standards) and some other [references](references.md).
+These guidelines were strongly inspired from Paypal's API Standards and some other [references](references.md).
 
 ## Document Semantics, Formatting, and Naming
 
