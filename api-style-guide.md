@@ -414,7 +414,7 @@ APIs MAY use hypermedia, thought it is not mandatory. APIs using hypermedia MUST
 
 ### HAL
 
-HAL is a simple format that gives a consistent and easy way to hyperlink between resources in your API. For detailed information on HAL refer to this [link](http://stateless.co/hal_specification.html). In short, HAL provides a set of conventions for expressing hyperlinks in either JSON or XML. 
+HAL is a simple format that gives a consistent and easy way to hyperlink between resources in your API. For detailed information on HAL refer to this [link](https://stateless.group/hal_specification.html). In short, HAL provides a set of conventions for expressing hyperlinks in either JSON or XML. 
 
 For simplicity reasons, all APIs using HATEOAS along with HAL formatting MUST only use the following properties. 
 * `_links` : This property contains links related to the current object. For example, a `customer` object using HAL will contain links to the vehicles owned by the user.
