@@ -473,11 +473,11 @@ For additional examples, please refer to this [list of public hypermedia APIs us
 **Example** : API called `factory` under the `manufacturing` domain. This specific endpoint addresses `v1` of the API and accesses the ressource `customers` (filtering by name `John`) 
 
 ```log
- https://api-prepod.mpsa.com/manufacturing/factory/v1/customers?name=john
- \___/  \_________________/ \___________/\______/ \_/ \_______/ \_______/ 
-   |             |                |          |     |      |         |
-protocol      domain        classification  api version resource  query 
-           environement                     name                parameters
+ https://api-preprod.mpsa.com/manufacturing/factory/v1/customers?name=john
+ \___/  \___________________/\____________/\______/\_/\________/ \_______/ 
+   |             |                 |          |     |      |         |
+protocol      domain        classification   api version resource  query 
+           environement                      name                parameters
 ```
 
 APIs at PSA MUST be be formatted with the following components : 
